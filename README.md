@@ -283,8 +283,8 @@ lattice has between 1 and 7 dimensions with 10 elements per dimension. The latti
 | 10⁶=1000000      | 6.3 MB         | 35 ms  | 206.4 MB   |
 | 10⁷=10000000     | 47.8 MB        | 300 ms | 2.2 GB     |
 
-Per element, the naive implementation maintains one integer-array representing its components as well as pointers to its 
-successors and predecessors.
+For reference, I included the expected in-memory size of a naive implementation, which maintains one integer-array representing 
+components as well as pointers to successors and predecessors for each element.
 
 ####Run-time complexity####
 
