@@ -270,7 +270,7 @@ Measured with a Lenovo Thinkpad T440s on Ubuntu 14.04 with an Oracle JVM 1.7.0 (
 ####Space complexity####
 
 The following table shows a comparison of the in-memory size of lattices with 10¹ (ten) to 10⁷ (one billion) elements. Each
-lattice has 1 to 7 dimensions with 10 elements per dimension. The lattices have been materialized with a call to
+lattice has between 1 and 7 dimensions with 10 elements per dimension. The lattices have been materialized with a call to
 ```lattice.unsafe().materialize()``` which is a shortcut for calling ```putData()``` on all elements in the lattice.
 
 | #Elements        | Size           | Time   | Naive size |
