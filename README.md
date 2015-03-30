@@ -2,7 +2,7 @@
 
 ##Background##
 
-In mathematics, a *lattice* is a partially ordered set L in which every two elements have a unique supremum (also called 
+In mathematics, a *lattice* is a partially ordered set ```L``` in which every two elements have a unique supremum (also called 
 a least upper bound) and a unique infimum (also called a greatest lower bound). A bounded lattice is 
 a lattice that additionally has a greatest element ```1``` and a least element ```0```, which satisfy ```0 ≤ x ≤ 1``` for 
 every ```x in L```. [(Source)](http://en.wikipedia.org/wiki/Lattice_%28order%29)
@@ -222,8 +222,8 @@ following two conditions are met:
  - We query for (1, 3, 20) with <= and the result will be ```false``` (which is wrong).
 
 The following output shows the in-memory representation of a lattice over the dimensions
-({"A", "B", "C", "D"}, {"A", "B"}, {"A", "B", "C"}) for which put has been called with an upwards-predictive property
-for nodes ("B", "B", "C") and ("A", "A", "A"):
+```({0, 1, 2, 3}, {0, 1}, {0, 1, 2})``` for which put has been called with an upwards-predictive property
+for nodes ```(1, 1, 2)``` and ```(0, 0, 0)```:
 
 ```Java
 Lattice
