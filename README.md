@@ -62,7 +62,7 @@ Lattice<String, Integer> lattice = new Lattice<String, Integer>(elements);
 
 ###Spaces###
 
-Elements from lattices may be represented in three different ```spaces```:
+Elements from lattices may be represented in three different *spaces*:
 
 - The *source space*: This space is meant to provide natural representations of elements, e.g., ```(A, B, C)```
 - The *id space*:     In this space, each element is represented by an identifier, which is a positive long value. You may use
