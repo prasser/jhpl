@@ -313,7 +313,6 @@ This requires ~200ms with a maximum of 8 ms per level (55 generalization levels 
 
 ```Java
 processAll(lattice.listNodes());
-}
 ```
 This requires ~25ms.
 
@@ -331,12 +330,13 @@ The resulting lattice consumes about 3.5 MB of space.
 #####2. Listing all nodes with any property level-by-level#####
 
 For each level, we enumerate over all elements that are associated with *any* property. Additionally, we perform a space
-mapping by calling toId(element) for all elements returned by the iterators. This requires ~300 ms and returns 980.133 elements,
-meaning that roughly 98% of the whole lattice have been characterized by at least one property during step 1:
+mapping by calling ```toId(element)``` for all elements returned by the iterators. This requires ~300 ms and returns 980.133 
+elements, meaning that roughly 98% of the whole lattice have been characterized by at least one property during step 1:
 
 ```Java
 for (int level = 0; level < lattice.numLevels(); level++) {
-	processAll(lattice.space().indexIteratorToIdIterator(lattice.unsafe().listNodesWithProperty()));
+	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty();
+	processAll(lattice.space().indexIteratorToIdIterator(iter));
 }
 ```
 
@@ -352,7 +352,8 @@ with 2.7 properties:
 ```Java
 for (PredictiveProperty property : properties) { 
 	for (int level = 0; level < lattice.numLevels(); level++) {
-		processAll(lattice.space().indexIteratorToIdIterator(lattice.unsafe().listNodesWithProperty(property)));
+	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty(property);
+		processAll(lattice.space().indexIteratorToIdIterator(iter));
 	}
 }
 ```
@@ -362,7 +363,8 @@ for (PredictiveProperty property : properties) {
 Again, we also perform space mapping:
 
 ```Java
-processAll(lattice.space().indexIteratorToIdIterator(lattice.unsafe().listNodesWithoutProperty()));
+Iterator<int[]> iter = lattice.unsafe().listNodesWithoutProperty();
+processAll(lattice.space().indexIteratorToIdIterator(iter));
 ```
 
 This takes ~150 ms, compared to the 300 ms required for enumerating the elements level-by-level.
