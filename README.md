@@ -157,12 +157,10 @@ The methods provided by the class ```Lattice``` are optimized for read access an
 - ```hasProperty(node, property)```: Determines whether a node is associated with a property (includes inherited properties). Guaranteed *O(1)*.
 - ```putProperty(node, property)```: Associates a node and predecessors or successors with a (predictive) property. 
      The worst-case run-time complexity of this operation is *O(#nodes for which put has already been called with this property)*.
-     Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     a complexity of *amortized O(1)*.
+     With real-world access patterns, it is more likely to have a complexity of *amortized O(1)*.
 - ```removeProperty(node, property)```: Removes the association between a node and predecessors or successors with a (predictive) property. 
      The worst-case run-time complexity of this operation is *O(#nodes for which put has been called with this property)*.
-     Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     a complexity of *amortized O(1)*.
+     With real-world access patterns, it is more likely to have a complexity of *amortized O(1)*.
 
 ###Enumerating elements###
 
