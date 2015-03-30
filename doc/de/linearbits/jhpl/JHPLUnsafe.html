@@ -1,0 +1,564 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>JHPLUnsafe (Java High Performance Lattice Library)</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="JHPLUnsafe (Java High Performance Lattice Library)";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../de/linearbits/jhpl/package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/JHPLUnsafe.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../de/linearbits/jhpl/JHPLSpace.html" title="class in de.linearbits.jhpl"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../de/linearbits/jhpl/Lattice.html" title="class in de.linearbits.jhpl"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?de/linearbits/jhpl/JHPLUnsafe.html" target="_top">Frames</a></li>
+<li><a href="JHPLUnsafe.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">de.linearbits.jhpl</div>
+<h2 title="Class JHPLUnsafe" class="title">Class JHPLUnsafe</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>de.linearbits.jhpl.JHPLUnsafe</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<hr>
+<br>
+<pre>public class <span class="strong">JHPLUnsafe</span>
+extends java.lang.Object</pre>
+<div class="block">This class provides methods that may not be safe to use on very large lattices because their complexity grows
+ linearly with the size of the lattice.</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== PROPERTY SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="property_summary">
+<!--   -->
+</a>
+<h3>Property Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Property Summary table, listing properties, and an explanation">
+<caption><span>Properties</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Type</th>
+<th class="colLast" scope="col">Property and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutProperty">listNodesWithout</a></strong></code>
+<div class="block">Lists all nodes without any property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithProperty">listNodesWith</a></strong></code>
+<div class="block">Lists all nodes with any property</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listAllNodes()">listAllNodes</a></strong>()</code>
+<div class="block">Enumerates all nodes regardless of whether or not they are stored in the lattice</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listAllNodes(int)">listAllNodes</a></strong>(int&nbsp;level)</code>
+<div class="block">Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesNotStored()">listNodesNotStored</a></strong>()</code>
+<div class="block">Lists all nodes not stored in the lattice</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesNotStored(int)">listNodesNotStored</a></strong>(int&nbsp;level)</code>
+<div class="block">Lists all nodes not stored in the lattice on the given level</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutProperty()">listNodesWithoutProperty</a></strong>()</code>
+<div class="block">Lists all nodes without any property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutProperty(int)">listNodesWithoutProperty</a></strong>(int&nbsp;level)</code>
+<div class="block">Lists all nodes without any property</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutProperty(de.linearbits.jhpl.PredictiveProperty)">listNodesWithoutProperty</a></strong>(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
+<div class="block">Lists all nodes without the given property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutProperty(de.linearbits.jhpl.PredictiveProperty,%20int)">listNodesWithoutProperty</a></strong>(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property,
+                        int&nbsp;level)</code>
+<div class="block">Lists all nodes without the given property</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutPropertyAndNotStored()">listNodesWithoutPropertyAndNotStored</a></strong>()</code>
+<div class="block">Lists all nodes without any property and which have not been stored in this lattice</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithoutPropertyAndNotStored(int)">listNodesWithoutPropertyAndNotStored</a></strong>(int&nbsp;level)</code>
+<div class="block">Lists all nodes without any property and which have not been stored in this lattice</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithProperty()">listNodesWithProperty</a></strong>()</code>
+<div class="block">Lists all nodes with any property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithProperty(int)">listNodesWithProperty</a></strong>(int&nbsp;level)</code>
+<div class="block">Lists all nodes with any property</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithProperty(de.linearbits.jhpl.PredictiveProperty)">listNodesWithProperty</a></strong>(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
+<div class="block">Lists all nodes with the given property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithProperty(de.linearbits.jhpl.PredictiveProperty,%20int)">listNodesWithProperty</a></strong>(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property,
+                     int&nbsp;level)</code>
+<div class="block">Lists all nodes with the given property</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithPropertyOrStored()">listNodesWithPropertyOrStored</a></strong>()</code>
+<div class="block">Lists all nodes with any property or which have been stored in the lattice</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#listNodesWithPropertyOrStored(int)">listNodesWithPropertyOrStored</a></strong>(int&nbsp;level)</code>
+<div class="block">Lists all nodes with any property or which have been stored in the lattice</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/JHPLUnsafe.html#materialize()">materialize</a></strong>()</code>
+<div class="block">Materializes the whole lattice.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ PROPERTY DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="property_detail">
+<!--   -->
+</a>
+<h3>Property Detail</h3>
+<a name="listNodesWithoutProperty">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithout</h4>
+<div class="block">Lists all nodes without any property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithProperty">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>listNodesWith</h4>
+<div class="block">Lists all nodes with any property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="listAllNodes()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listAllNodes</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listAllNodes()</pre>
+<div class="block">Enumerates all nodes regardless of whether or not they are stored in the lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listAllNodes(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listAllNodes</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listAllNodes(int&nbsp;level)</pre>
+<div class="block">Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesNotStored()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesNotStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesNotStored()</pre>
+<div class="block">Lists all nodes not stored in the lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesNotStored(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesNotStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesNotStored(int&nbsp;level)</pre>
+<div class="block">Lists all nodes not stored in the lattice on the given level</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutProperty()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutProperty()</pre>
+<div class="block">Lists all nodes without any property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutProperty(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutProperty(int&nbsp;level)</pre>
+<div class="block">Lists all nodes without any property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutProperty(de.linearbits.jhpl.PredictiveProperty)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutProperty(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
+<div class="block">Lists all nodes without the given property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>property</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutProperty(de.linearbits.jhpl.PredictiveProperty, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutProperty(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property,
+                                                 int&nbsp;level)</pre>
+<div class="block">Lists all nodes without the given property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>property</code> - </dd><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutPropertyAndNotStored()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutPropertyAndNotStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutPropertyAndNotStored()</pre>
+<div class="block">Lists all nodes without any property and which have not been stored in this lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithoutPropertyAndNotStored(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithoutPropertyAndNotStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithoutPropertyAndNotStored(int&nbsp;level)</pre>
+<div class="block">Lists all nodes without any property and which have not been stored in this lattice</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithProperty()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithProperty()</pre>
+<div class="block">Lists all nodes with any property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithProperty(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithProperty(int&nbsp;level)</pre>
+<div class="block">Lists all nodes with any property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithProperty(de.linearbits.jhpl.PredictiveProperty)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithProperty(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
+<div class="block">Lists all nodes with the given property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>property</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithProperty(de.linearbits.jhpl.PredictiveProperty, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithProperty</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithProperty(<a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property,
+                                              int&nbsp;level)</pre>
+<div class="block">Lists all nodes with the given property</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>property</code> - </dd><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithPropertyOrStored()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithPropertyOrStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithPropertyOrStored()</pre>
+<div class="block">Lists all nodes with any property or which have been stored in the lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesWithPropertyOrStored(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesWithPropertyOrStored</h4>
+<pre>public&nbsp;java.util.Iterator&lt;int[]&gt;&nbsp;listNodesWithPropertyOrStored(int&nbsp;level)</pre>
+<div class="block">Lists all nodes with any property or which have been stored in the lattice</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="materialize()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>materialize</h4>
+<pre>public&nbsp;void&nbsp;materialize()</pre>
+<div class="block">Materializes the whole lattice. The result of this method is similar to calling put() for 
+ each node returned by listAllNodes(). It is here for your convenience, only.</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../de/linearbits/jhpl/package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/JHPLUnsafe.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../de/linearbits/jhpl/JHPLSpace.html" title="class in de.linearbits.jhpl"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../de/linearbits/jhpl/Lattice.html" title="class in de.linearbits.jhpl"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?de/linearbits/jhpl/JHPLUnsafe.html" target="_top">Frames</a></li>
+<li><a href="JHPLUnsafe.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
