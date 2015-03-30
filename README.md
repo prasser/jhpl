@@ -331,7 +331,7 @@ The resulting lattice consumes about 3.5 MB of space.
 
 For each level, we enumerate over all elements that are associated with *any* property. Additionally, we perform a space
 mapping by calling ```toId(element)``` for all elements returned by the iterators. This requires ~300 ms and returns 980.133 
-elements, meaning that roughly 98% of the whole lattice have been characterized by at least one property during step 1:
+elements, meaning that roughly 98% of the elements in the lattice are characterized by at least one property as a result from step 1:
 
 ```Java
 for (int level = 0; level < lattice.numLevels(); level++) {
