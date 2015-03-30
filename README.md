@@ -30,7 +30,7 @@ about individual elements and groups of elements as well as supporting the enume
 ##Motivation##
 
 The type of lattices modeled by this library can become very large. If a lattice consists of elements with ```n``` dimensions,
-where each dimension i (```0 ≤ i < n```) has ```m_i``` different components, the total number of elements is 
+where each dimension ```i``` with (```0 ≤ i < n```) has ```m_i``` different components, the total number of elements is 
 ```m_0 * m_1 * ... * m_(n-1)```.
 
 The aim of this library is to efficiently (in terms of space and time complexity) represent lattices by storing information
