@@ -153,8 +153,8 @@ The methods provided by the class ```Lattice``` are optimized for read access an
 - ```getData(node)```: Retrieves the associated data. Guaranteed *O(1)*.
 - ```putData(node, data)```: Associates data with a node. Guaranteed *O(1)*.
 - ```contains(node)```: Returns whether any data is stored about a node. Guaranteed *O(1)*.
-- ```hasProperty(node)```: Returns whether any property is associated with a node. Guaranteed *O(1)*.
-- ```hasProperty(node, property)```: Determines whether a node is associated with a (predictive) property. Guaranteed *O(1)*.
+- ```hasProperty(node)```: Returns whether any property is associated with a node (includes inherited properties). Guaranteed *O(1)*.
+- ```hasProperty(node, property)```: Determines whether a node is associated with a property (includes inherited properties). Guaranteed *O(1)*.
 - ```putProperty(node, property)```: Associates a node and predecessors or successors with a (predictive) property. 
      The worst-case run-time complexity of this operation is *O(#nodes for which put has already been called with this property)*.
      Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
