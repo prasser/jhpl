@@ -303,7 +303,7 @@ for (int level=0; level<lattice.numLevels(); level++) {
 	processAll(lattice.listNodes(level));
 }
 ```
-This requires ~200ms with a maximum of 8 ms per level (55 generalization levels in total).
+This requires ~200ms with a maximum of 8 ms per level (55 levels in total).
 
 #####2. Enumerating all elements (in a natural order)#####
 
