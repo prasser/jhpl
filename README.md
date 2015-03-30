@@ -178,12 +178,12 @@ for "small" lattices (e.g., with up to a few million elements):
 
 - ```listAllNodes()```: List all nodes in the lattice.
 - ```listNodesNotStored()```: List all nodes for which no data is stored in the lattice.
-- ```listNodesWithProperty()```: Lists all nodes which are associated with a property (also predictively).
-- ```listNodesWithProperty(property)```: Lists all nodes which are associated with the given property (also predictively).
-- ```listNodesWithPropertyOrStored()```: Lists all nodes which are associated with a property or for which data is stored.
-- ```listNodesWithoutProperty()```: Lists all nodes which are not associated with any property.
-- ```listNodesWithoutProperty(property)```: Lists all nodes which are not associated with the given property.
-- ```listNodesWithoutPropertyAndNotStored()```: Lists all nodes which are not associated with any property and for which not data is stored.
+- ```listNodesWithProperty()```: Lists all nodes which are associated with a property (includes inherited properties).
+- ```listNodesWithProperty(property)```: Lists all nodes which are associated with the given property (includes inherited properties).
+- ```listNodesWithPropertyOrStored()```: Lists all nodes which are associated with a property (includes inherited properties) or for which data is stored.
+- ```listNodesWithoutProperty()```: Lists all nodes which are not associated with any property (includes inherited properties).
+- ```listNodesWithoutProperty(property)```: Lists all nodes which are not associated with the given property (includes inherited properties).
+- ```listNodesWithoutPropertyAndNotStored()```: Lists all nodes which are not associated with any property (includes inherited properties) and for which not data is stored.
 
 *Note:* All of these methods support an optional parameter with which the *level* of the nodes that are to be returned
 may be specified.
