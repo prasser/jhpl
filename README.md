@@ -64,8 +64,8 @@ Lattice<String, Integer> lattice = new Lattice<String, Integer>(elements);
 
 Elements from lattices may be represented in three different *spaces*:
 
-- The *source space*: This space is meant to provide natural representations of elements, e.g., ```(A, B, C)```
-- The *id space*:     In this space, each element is represented by an identifier, which is a positive long value. You may use
+- The *source space*: This space is meant to provide *natural representations* of elements, e.g., ```(A, B, C)```.
+- The *id space*:     In this space, each element is represented by an identifier, which is a *positive long value*. You may use
                       this representation to store larger sets of elements or to use them as keys in maps.
 - The *index space*:  This space represents elements by indices that correspond to the position of each element in the
                       source space. For example, the index representation of ```("0", "1")``` is ```(0, 1)```. 
@@ -86,8 +86,6 @@ int[] index = lattice.space().toIndex(element);
 
 // Convert index to source
 element = lattice.space().toSource(index);
-
-// Etc.
 ```
 
 Additionally, the class provides methods for converting iterators:
@@ -153,7 +151,7 @@ PredictiveProperty property3 = new PredictiveProperty(Direction.BOTH);
 The methods provided by the class ```Lattice``` are optimized for read access and have the following run-time complexities:
 
 - ```getData(node)```: Retrieves the associated data. Guaranteed *O(1)*.
-- ```putData(node)```: Associates data with a node. Guaranteed *O(1)*.
+- ```putData(node, data)```: Associates data with a node. Guaranteed *O(1)*.
 - ```contains(node)```: Returns whether any data is stored about a node. Guaranteed *O(1)*.
 - ```hasProperty(node)```: Returns whether any property is associated with a node. Guaranteed *O(1)*.
 - ```hasProperty(node, property)```: Determines whether a node is associated with a (predictive) property. Guaranteed *O(1)*.
