@@ -300,7 +300,7 @@ the lattice and set the property.
 
 The following numbers show the time needed to enumerate all elements from a materialized lattice with 1 million elements. 
 
-1. Enumerating the elements level by level (in a natural order)
+#####1. Enumerating the elements level by level (in a natural order)#####
 
 ```Java
 for (int level=0; level<lattice.numLevels(); level++) {
@@ -309,7 +309,7 @@ for (int level=0; level<lattice.numLevels(); level++) {
 ```
 This requires ~200ms with a maximum of 8 ms per level (55 generalization levels in total).
 
-2. Enumerating all elements (in a natural order)
+#####2. Enumerating all elements (in a natural order)#####
 
 ```Java
 processAll(lattice.listNodes());
@@ -323,12 +323,12 @@ This is a more complex experiment. First, we create a lattice with 1 million ele
 two of which are inherited to successors, two of which are inherited to predecessors and one of which is inherited to successors and
 predecessors. 
 
-1. Setting the properties
+#####1. Setting the properties#####
 
 We associate each property to 10.000 random elements (50.000 put operations). This takes ~240 ms. 
 The resulting lattice consumes about 3.5 MB of space.
 
-2. Listing all nodes with any property level-by-level
+#####2. Listing all nodes with any property level-by-level#####
 
 For each level, we enumerate over all elements that are associated with *any* property. Additionally, we perform a space
 mapping by calling toId(element) for all elements returned by the iterators. This requires ~300 ms and returns 980.133 elements,
@@ -342,7 +342,7 @@ for (int level = 0; level < lattice.numLevels(); level++) {
 
 Calling ```listNodesWithoutProperty()``` exhibits comparable performance.
 
-3. Listing nodes with a specific property level-by-level
+#####3. Listing nodes with a specific property level-by-level#####
 
 For each level and each property, we enumerate over all elements that are associated with the property. 
 Additionally, we perform a space mapping by calling toId(element) for all elements returned by the iterators. 
@@ -357,7 +357,7 @@ for (PredictiveProperty property : properties) {
 }
 ```
 
-4. Listing all nodes without any property
+#####4. Listing all nodes without any property#####
 
 Again, we also perform space mapping:
 
