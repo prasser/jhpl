@@ -356,7 +356,7 @@ for (PredictiveProperty property : properties) {
 
 #####4. Listing all nodes without any property#####
 
-Again, we also perform space mapping:
+Again we also perform space mapping:
 
 ```Java
 Iterator<int[]> iter = lattice.unsafe().listNodesWithoutProperty();
