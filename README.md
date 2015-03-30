@@ -124,7 +124,7 @@ Iterator<int[]> iter = lattice.nodes().listSuccessors(lattices.nodes().getBottom
 // Store references
 LongArrayList list = new LongArrayList();
 while (iter.hasNext()) {
-	list.add(iter.next());
+	list.add(lattice.space().toId(iter.next()));
 }
 
 // Work with the elements from the list
