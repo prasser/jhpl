@@ -96,6 +96,8 @@ Additionally, the class provides methods for converting iterators:
 - ```Iterator<int[]> sourceIteratorToIndexIterator(Iterator<T[]>)```
 - ```Iterator<Long> sourceIteratorToIdIterator(Iterator<T[]>)```
 
+###Nodes###
+
 Methods for working with nodes are encapsulated in a class that is accessible via the method
 ```lattice.nodes()```. Some examples:
 
@@ -130,6 +132,12 @@ for (long e : list) {
 	int[] index = lattice.space().toIndex(e);
 	boolean stored = lattice.contains(index);
 }
+```
+
+For your convenience, JHPL also contains a builder for elements from the source space:
+
+```Java
+int[] element = lattice.nodes().build().next("B").next("B").next("C").create();
 ```
 
 ###Storing data###
