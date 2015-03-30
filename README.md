@@ -199,9 +199,14 @@ may be specified.
 *Note:* Similar methods are also provided for listing successors and predecessors with certain conditions
 (e.g. ```lattice.nodes().listSuccessorsWithoutProperty(node)```). These are safe to call at any time.
 
+*Note:* Never assume that the integer arrays returned by this library are newly allocated! Never manipulate them and don't store
+any references to them. If you need to keep track of a set of elements: use the id space.
+
 *Note:* Methods from this library do not support concurrent modifications. An according exception will be raised.
 
 *Note:* Methods from this library are not thread-safe.
+
+*Note:* This library is work in progress. Things may change in the future.
 
 ##Details and Evaluation##
 
