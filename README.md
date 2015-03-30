@@ -5,11 +5,11 @@
 In mathematics, a *lattice* is a partially ordered set ```L``` in which every two elements have a unique supremum (also called 
 a least upper bound) and a unique infimum (also called a greatest lower bound). A bounded lattice is 
 a lattice that additionally has a greatest element ```1``` and a least element ```0```, which satisfy ```0 ≤ x ≤ 1``` for 
-every ```x in L```. [(Source)](http://en.wikipedia.org/wiki/Lattice_%28order%29)
+every ```x in L```. [(Source: Wikipedia)](http://en.wikipedia.org/wiki/Lattice_%28order%29)
 
 Lattices can be modeled with *Hasse diagrams*. In order theory, a Hasse diagram is a type of mathematical 
 diagram used to represent a finite partially ordered set, in the form of a drawing of its transitive reduction.
-[(Source)](http://en.wikipedia.org/wiki/Hasse_diagram)
+[(Source: Wikipedia)](http://en.wikipedia.org/wiki/Hasse_diagram)
 
 This library has been designed to model a specific type of bounded lattices, in which *each element is a combination of elements 
 from different dimensions*. The elements from each dimension are required to have a *total order*. Natural numbers with a 
