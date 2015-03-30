@@ -335,7 +335,7 @@ elements, meaning that roughly 98% of the elements in the lattice are characteri
 
 ```Java
 for (int level = 0; level < lattice.numLevels(); level++) {
-	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty();
+	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty(level);
 	processAll(lattice.space().indexIteratorToIdIterator(iter));
 }
 ```
@@ -352,7 +352,7 @@ with 2.7 properties:
 ```Java
 for (PredictiveProperty property : properties) { 
 	for (int level = 0; level < lattice.numLevels(); level++) {
-	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty(property);
+	Iterator<int[]> iter = lattice.unsafe().listNodesWithProperty(level, property);
 		processAll(lattice.space().indexIteratorToIdIterator(iter));
 	}
 }
