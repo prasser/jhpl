@@ -1,4 +1,4 @@
-#JHPL - Java High-Performance Library for Lattices# 
+#JHPL - Java High-Performance Library for Lattices
 
 ##Background##
 
