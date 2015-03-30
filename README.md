@@ -292,7 +292,7 @@ components as well as pointers to successors and predecessors for each element.
 
 The following numbers show the time needed to assign a predictive property to all nodes of a lattice with 1 million elements
 (1 million calls to ```putProperty()```). The best-case performance simply needs to check whether the property already exists 
-and the worst-case performance needs to check, clear the lattice and set the property.
+and the worst-case performance needs to check, clear the trie and set the property.
 - Best-case: 188 milliseconds (188 nanoseconds per put-operation)
 - Worst-case: 564 milliseconds (564 nanoseconds per put-operation) 
 
