@@ -211,16 +211,15 @@ predecessors or with less-than-or-equals for properties that are inherited to su
 following two conditions are met:
 
 1. It is made sure that no properties are stored for elements that already have the given property. Counterexample:
-- Assume property A is predictive in an upwards direction.
-- We first add property A for (1, 2, 1)
-- We then add property A for (1, 3, 25). 
-- We query for (1, 3, 20) with <= and the result will be ```false``` (which is wrong).
-
+ - Assume property A is predictive in an upwards direction.
+ - We first add property A for (1, 2, 1)
+ - We then add property A for (1, 3, 25). 
+ - We query for (1, 3, 20) with <= and the result will be ```false``` (which is wrong).
 2. It is made sure that all obsolete properties are removed. Counterexample:
-- Assume property A is predictive in an upwards direction.
-- We first add property A for (1, 3, 25)
-- We then add property A for (1, 2, 1). 
-- We query for (1, 3, 20) with <= and the result will be ```false``` (which is wrong).
+ - Assume property A is predictive in an upwards direction.
+ - We first add property A for (1, 3, 25)
+ - We then add property A for (1, 2, 1). 
+ - We query for (1, 3, 20) with <= and the result will be ```false``` (which is wrong).
 
 The following output shows the in-memory representation of a lattice over the dimensions
 ({"A", "B", "C", "D"}, {"A", "B"}, {"A", "B", "C"}) for which put has been called with an upwards-predictive property
