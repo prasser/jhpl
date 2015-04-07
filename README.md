@@ -119,7 +119,7 @@ of collections of primitive values, as, e.g., provided by the [HPPC project](htt
 
 ```Java
 // List all successors of the bottom element
-Iterator<int[]> iter = lattice.nodes().listSuccessors(lattices.nodes().getBottom());
+Iterator<int[]> iter = lattice.nodes().listSuccessors(lattice.nodes().getBottom());
 
 // Store references
 LongArrayList list = new LongArrayList();
