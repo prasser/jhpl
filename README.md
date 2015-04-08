@@ -119,7 +119,7 @@ of collections of primitive values, as, e.g., provided by the [HPPC project](htt
 
 ```Java
 // List all successors of the bottom element
-Iterator<int[]> iter = lattice.nodes().listSuccessors(lattices.nodes().getBottom());
+Iterator<int[]> iter = lattice.nodes().listSuccessors(lattice.nodes().getBottom());
 
 // Store references
 LongArrayList list = new LongArrayList();
@@ -278,7 +278,7 @@ Measured with a Lenovo Thinkpad T440s on Ubuntu 14.04 with an Oracle JVM 1.7.0 (
 
 ####Space complexity####
 
-The following table shows a comparison of the in-memory size of lattices with 10¹ (ten) to 10⁷ (one billion) elements. Each
+The following table shows a comparison of the in-memory size of lattices with 10¹ (ten) to 10⁷ (ten million) elements. Each
 lattice has between 1 and 7 dimensions with 10 elements per dimension. The lattices have been materialized with a call to
 ```lattice.unsafe().materialize()``` which is a shortcut for calling ```putData()``` on all elements in the lattice.
 
