@@ -168,69 +168,63 @@ class JHPLTrie {
     /**
      * Queries this trie for the given element
      * @param element
-     * @param dimension
-     * @param offset
      * @param comparator
      */
-    private boolean contains(int[] element, int dimension, int offset, ElementComparator comparator) {
-        
-        // Init
-        offset += element[dimension];
-        
-        // Find
-        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
-        switch (comparator) {
-        case EQ:
-            pointer = buffer.memory[offset];
-            break;
-        case GEQ:
-            for (int i = 0; pointer == JHPLBuffer.FLAG_NOT_AVAILABLE && i < heights[dimension] - element[dimension]; i++) {
-                pointer = buffer.memory[offset + i];
-            }
-            break;
-        case LEQ:
-            for (int i = 0; pointer == JHPLBuffer.FLAG_NOT_AVAILABLE && i <= element[dimension]; i++) {
-                pointer = buffer.memory[offset - i];
-            }
-            break;
-        }
-        
-        // Terminate
-        if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-            return false;
-
-        // Terminate
-        } else if (dimension == dimensions - 1){
-            return true;
+    private boolean containsInternal(int[] element, ElementComparator comparator) {
+        int offset = 0;
+        for (int dimension = 0; dimension < element.length; dimension++) {
+            // Init
+            offset += element[dimension];
             
-        // Recursion
-        } else {
-            return contains(element, dimension + 1, pointer, comparator);
+            // Find
+            int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
+            switch (comparator) {
+            case EQ:
+                pointer = buffer.memory[offset];
+                break;
+            case GEQ:
+                for (int i = 0; pointer == JHPLBuffer.FLAG_NOT_AVAILABLE && i < heights[dimension] - element[dimension]; i++) {
+                    pointer = buffer.memory[offset + i];
+                }
+                break;
+            case LEQ:
+                for (int i = 0; pointer == JHPLBuffer.FLAG_NOT_AVAILABLE && i <= element[dimension]; i++) {
+                    pointer = buffer.memory[offset - i];
+                }
+                break;
+            }
+            
+            // Terminate
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                return false;
+            }
+            
+            offset = pointer;
         }
+        
+        return true;
     }
 
     /**
      * Helper for putting an element into this trie
      * @param element
-     * @param dimension
-     * @param offset
      */
-    private void put(int[] element, int dimension, int offset) {
-       
-        offset += element[dimension];
-        
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1]);
-            used += heights[dimension + 1];
-            buffer.memory[offset] = pointer;
+    private void putInternal(int[] element) {
+        int offset = 0;
+        // Iterate over all inner nodes
+        for (int dimension = 0; dimension < element.length - 1; dimension++) {
+            offset += element[dimension];
+            if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                int pointer = buffer.allocate(heights[dimension + 1]);
+                used += heights[dimension + 1];
+                buffer.memory[offset] = pointer;
+            }
+            offset = buffer.memory[offset];
         }
         
-        put(element, dimension + 1, buffer.memory[offset]);
+        // Leaf node
+        offset += element[element.length - 1];
+        buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
     }
 
     /**
@@ -300,7 +294,7 @@ class JHPLTrie {
      * @return
      */
     boolean contains(int[] node, ElementComparator comparator) {
-        return contains(node, 0, 0, comparator);
+        return containsInternal(node, comparator);
     }
     
     /**
@@ -464,7 +458,7 @@ class JHPLTrie {
      * @param element
      */
     void put(int[] element) {
-        put(element, 0, 0);
+        putInternal(element);
     }
 
     /**
