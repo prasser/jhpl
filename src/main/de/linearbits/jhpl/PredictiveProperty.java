@@ -28,6 +28,8 @@ public class PredictiveProperty {
      * @author Fabian Prasser
      */
     public static enum Direction {
+        /** Predictive for no element*/
+        NONE,
         /** Predictive for the element and all of its (direct and indirect) successors*/
         BOTH,
         /** Predictive for the element and all of its (direct and indirect) predecessors*/

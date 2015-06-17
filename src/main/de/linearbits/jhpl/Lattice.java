@@ -54,23 +54,25 @@ import de.linearbits.jhpl.PredictiveProperty.Direction;
 public class Lattice<T, U> {
 
     /** Data */
-    private final JHPLData<T, U>                    data;
+    private final JHPLData<T, U>                            data;
     /** All materialized nodes */
-    private final JHPLTrie                          master;
+    private final JHPLTrie                                  master;
     /** Nodes */
-    private final JHPLNodes<T>                      nodes;
+    private final JHPLNodes<T>                              nodes;
     /** Tries for properties */
-    private final Map<PredictiveProperty, JHPLTrie> propertiesDown;
+    private final Map<PredictiveProperty, JHPLTrie>         propertiesDown;
     /** Tries for properties */
-    private final Map<PredictiveProperty, JHPLTrie> propertiesUp;
+    private final Map<PredictiveProperty, JHPLTrie>         propertiesUp;
+    /** Tries for properties */
+    private final Map<PredictiveProperty, JHPLMap<Boolean>> propertiesNone;
     /** Space */
-    private final JHPLSpace<T>                      space;
+    private final JHPLSpace<T>                              space;
     /** Unsafe */
-    private final JHPLUnsafe                        unsafe;
+    private final JHPLUnsafe                                unsafe;
     /** Number of nodes */
-    private final long                              numNodes;
-    /** Tack modifications*/
-    private boolean                                 modified = false;
+    private final long                                      numNodes;
+    /** Tack modifications */
+    private boolean                                         modified = false;
 
     /**
      * Constructs a new lattice
@@ -116,6 +118,7 @@ public class Lattice<T, U> {
         this.data = new JHPLData<T, U>(space, elements);
         this.propertiesUp = new HashMap<PredictiveProperty, JHPLTrie>();
         this.propertiesDown = new HashMap<PredictiveProperty, JHPLTrie>();
+        this.propertiesNone = new HashMap<PredictiveProperty, JHPLMap<Boolean>>();
         this.master = new JHPLTrie(this);
         this.unsafe = new JHPLUnsafe(this);
     }
@@ -143,6 +146,9 @@ public class Lattice<T, U> {
         }
         for (JHPLTrie trie : this.propertiesDown.values()) {
             size += trie.getByteSize();
+        }
+        for (JHPLMap<Boolean> map : this.propertiesNone.values()) {
+            size += map.getByteSize();
         }
         return size;
     }
@@ -177,6 +183,11 @@ public class Lattice<T, U> {
                 return true;
             }
         }
+        for (PredictiveProperty property : this.propertiesNone.keySet()) {
+            Boolean result = this.propertiesNone.get(property).get(space().toId(node));
+            result = result == null ? false : result;
+            return result;
+        }
         return false;
     }
     
@@ -195,9 +206,13 @@ public class Lattice<T, U> {
             return this.propertiesUp.get(property).contains(node, ElementComparator.LEQ);
         } else if (property.getDirection() == Direction.DOWN) {
             return this.propertiesDown.get(property).contains(node, ElementComparator.GEQ);
-        } else {
+        } else if (property.getDirection() == Direction.BOTH) {
             return (this.propertiesUp.get(property).contains(node, ElementComparator.LEQ) || 
                     this.propertiesDown.get(property).contains(node, ElementComparator.GEQ));
+        } else {
+            Boolean result = this.propertiesNone.get(property).get(space().toId(node));
+            result = result == null ? false : result;
+            return result;
         }
     }
     
@@ -310,9 +325,11 @@ public class Lattice<T, U> {
             this.propertiesUp.get(property).put(node);
         } else if (property.getDirection() == Direction.DOWN) {
             this.propertiesDown.get(property).put(node);
-        } else {
+        } else if (property.getDirection() == Direction.BOTH) {
             this.propertiesUp.get(property).put(node); 
             this.propertiesDown.get(property).put(node);
+        } else {
+            this.propertiesNone.get(property).put(space().toId(node), true); 
         }
     }
     
@@ -337,9 +354,11 @@ public class Lattice<T, U> {
             this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
         } else if (property.getDirection() == Direction.DOWN) {
             this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
-        } else {
+        } else if (property.getDirection() == Direction.BOTH) {
             this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
             this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
+        } else {
+            this.propertiesNone.get(property).put(space().toId(node), null);
         }
     }
     
@@ -363,6 +382,10 @@ public class Lattice<T, U> {
         if (!propertiesDown.isEmpty()) {
             builder.append("├── Downwards-predictive properties\n");
             toString(builder, propertiesUp);
+        }
+        if (!propertiesNone.isEmpty()) {
+            builder.append("├── Non-predictive properties\n");
+            toStringNone(builder, propertiesNone);
         }
         builder.append("├── Master\n");
         builder.append(master.toString("|   └── ", "|       "));
@@ -396,12 +419,16 @@ public class Lattice<T, U> {
             if (!this.propertiesDown.containsKey(property)) {
                 this.propertiesDown.put(property, new JHPLTrie(this));
             }
-        } else {
+        } else if (property.getDirection() == Direction.BOTH) {
             if (!this.propertiesUp.containsKey(property)) {
                 this.propertiesUp.put(property, new JHPLTrie(this));
             }
             if (!this.propertiesDown.containsKey(property)) {
                 this.propertiesDown.put(property, new JHPLTrie(this));
+            }
+        } else {
+            if (!this.propertiesNone.containsKey(property)) {
+                this.propertiesNone.put(property, new JHPLMap<Boolean>());
             }
         }
     }
@@ -548,6 +575,21 @@ public class Lattice<T, U> {
         }
     }
 
+    /**
+     * To string
+     * @param builder
+     * @param properties
+     */
+    private void toStringNone(StringBuilder builder , Map<PredictiveProperty, JHPLMap<Boolean>> properties) {
+        List<PredictiveProperty> list = new ArrayList<PredictiveProperty>();
+        list.addAll(properties.keySet());
+        for (int i=0; i<list.size()-1; i++) {
+            PredictiveProperty property = list.get(i);
+            builder.append("|   ├── ").append(property.getLabel()).append("\n");
+            builder.append("|   |   └── Not implemented");
+        }
+    }
+    
     /**
      * To string
      * @param builder
