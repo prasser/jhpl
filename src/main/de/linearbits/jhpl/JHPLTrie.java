@@ -249,7 +249,8 @@ class JHPLTrie {
                 children.add(i);
             }
         }
-        for (int i = 0; i < children.size() - 1; i++) {
+        for (int j = 0; j < children.size() - 1; j++) {
+            int i = children.get(j);
             builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append("]\n");
             if (dimension != dimensions - 1) {
                 builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i], dimension + 1));
