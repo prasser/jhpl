@@ -381,7 +381,7 @@ public class Lattice<T, U> {
         }
         if (!propertiesDown.isEmpty()) {
             builder.append("├── Downwards-predictive properties\n");
-            toString(builder, propertiesUp);
+            toString(builder, propertiesDown);
         }
         if (!propertiesNone.isEmpty()) {
             builder.append("├── Non-predictive properties\n");
@@ -601,12 +601,12 @@ public class Lattice<T, U> {
         for (int i=0; i<list.size()-1; i++) {
             PredictiveProperty property = list.get(i);
             builder.append("|   ├── ").append(property.getLabel()).append("\n");
-            builder.append(propertiesUp.get(property).toString("|   |   └── ", "|   |       "));
+            builder.append(properties.get(property).toString("|   |   └── ", "|   |       "));
         }
         if (!list.isEmpty()) {
             PredictiveProperty property = list.get(list.size()-1);
             builder.append("|   └── ").append(property.getLabel()).append("\n");
-            builder.append(propertiesUp.get(property).toString("|       └── ", "|           "));
+            builder.append(properties.get(property).toString("|       └── ", "|           "));
         }
     }
 
