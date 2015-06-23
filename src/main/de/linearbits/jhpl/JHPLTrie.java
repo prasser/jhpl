@@ -41,7 +41,7 @@ class JHPLTrie {
     private static final double COMPACTION_THRESHOLD = 0.2d;
 
     /** The buffer */
-    private final JHPLBuffer        buffer;
+    private final JHPLBuffer    buffer;
     /** The number of dimensions */
     private final int           dimensions;
     /** The height of each dimension */
