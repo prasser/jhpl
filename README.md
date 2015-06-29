@@ -302,8 +302,8 @@ components as well as pointers to successors and predecessors for each element.
 The following numbers show the time needed to assign a predictive property to all nodes of a lattice with 1 million elements
 (1 million calls to ```putProperty()```). The best-case performance simply needs to check whether the property already exists 
 and the worst-case performance needs to check, clear the trie and set the property.
-- Best-case: 188 milliseconds (188 nanoseconds per put-operation)
-- Worst-case: 564 milliseconds (564 nanoseconds per put-operation) 
+- Best-case: 236 milliseconds (236 nanoseconds per put-operation)
+- Worst-case: 647 milliseconds (647 nanoseconds per put-operation) 
 
 ####Enumerating elements####
 
@@ -333,14 +333,14 @@ predecessors.
 
 #####1. Setting the properties#####
 
-We associate each property to 10.000 random elements (50.000 put operations). This takes ~240 ms. 
-The resulting lattice consumes about 3.5 MB of space.
+We associate each property to 10.000 random elements (50.000 put operations). This takes ~178 ms. 
+The resulting lattice consumes about 3.2 MB of space.
 
 #####2. Listing all nodes with any property level-by-level#####
 
 For each level, we enumerate over all elements that are associated with *any* property. Additionally, we perform a space
-mapping by calling ```toId(element)``` for all elements returned by the iterators. This requires ~300 ms and returns 980.133 
-elements, meaning that roughly 98% of the elements in the lattice are characterized by at least one property as a result from step 1:
+mapping by calling ```toId(element)``` for all elements returned by the iterators. This requires ~318 ms and returns 1M 
+elements, meaning that all elements in the lattice are associated with at least one property as a result from step 1:
 
 ```Java
 for (int level = 0; level < lattice.numLevels(); level++) {
@@ -355,8 +355,8 @@ Calling ```listNodesWithoutProperty()``` exhibits comparable performance.
 
 For each level and each property, we enumerate over all elements that are associated with the property. 
 Additionally, we perform a space mapping by calling toId(element) for all elements returned by the iterators. 
-This requires ~1200 ms and returns 2.674.978 elements, meaning that on average, each element is associated
-with 2.7 properties:
+This requires ~3614 ms and returns 4.880.679 elements, meaning that on average, each element is associated
+with 4.9 properties:
 
 ```Java
 for (PredictiveProperty property : properties) { 
@@ -376,7 +376,7 @@ Iterator<int[]> iter = lattice.unsafe().listNodesWithoutProperty();
 processAll(lattice.space().indexIteratorToIdIterator(iter));
 ```
 
-This takes ~150 ms, compared to the 300 ms required for enumerating the elements level-by-level.
+This takes ~170 ms, compared to the 332 ms required for enumerating the elements level-by-level.
 
 ##Download##
 A binary version (JAR file) is available for download [here](https://rawgithub.com/prasser/jhpl/master/jars/jhpl-0.0.1.jar).
