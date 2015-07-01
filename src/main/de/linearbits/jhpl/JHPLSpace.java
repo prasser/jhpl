@@ -146,7 +146,7 @@ public class JHPLSpace<T> {
     private final JHPLNodes<T>      nodes;
 
     /** The number of nodes */
-    private final int               numNodes;
+    private final long              numNodes;
 
     /**
      * Creates a new instance
@@ -165,14 +165,19 @@ public class JHPLSpace<T> {
             this.multiplier[i] = this.elements[i + 1].length * this.multiplier[i + 1];
         }
         this.indices = new HashMap[elements.length];
-        int nnodes = 1;
+        long nnodes = 1;
+        double ndouble = 1d;
         for (int j = 0; j < elements.length; j++) {
             T[] dimension = elements[j];
-            nnodes *= dimension.length;
+            nnodes *= (long)dimension.length;
+            ndouble *= (double)dimension.length;
             this.indices[j] = new HashMap<T, Integer>(dimension.length);
             for (int i = 0; i < dimension.length; i++) {
                 this.indices[j].put(dimension[i], i);
             }
+        }
+        if (ndouble > Long.MAX_VALUE) {
+            throw new IllegalArgumentException("A JHPL Lattice must not have more than 2^63-1 nodes");
         }
         this.numNodes = nnodes;
     }
