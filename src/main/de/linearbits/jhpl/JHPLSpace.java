@@ -375,8 +375,10 @@ public class JHPLSpace<T> {
      * @param id
      */
     private void checkId(long id) {
-        if (id < 0 || id >= numNodes) {
-            throw new IllegalArgumentException("Invalid id");
+        if (id < 0) {
+            throw new IllegalArgumentException("Invalid id: must not be negative");
+        } else if (id >= numNodes) { 
+            throw new IllegalArgumentException("Invalid id: must not be larger than " + (numNodes - 1)); 
         }
     }
 }
