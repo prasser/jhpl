@@ -34,8 +34,9 @@ where each dimension ```i``` with (```0 ≤ i < n```) has ```m_i``` different co
 ```m_0 * m_1 * ... * m_(n-1)```.
 
 The aim of this library is to efficiently (in terms of space and time complexity) represent lattices by storing information
-about elements only implicitly. You may, for example, use this library if you have a search problem for which the solution space 
-can be expressed as a lattice. JHPL supports lattices with up to ```2^63-1``` (```~9.223372 * 10¹⁸```) elements. Of course,
+about elements only implicitly. You may, for example, use this library if you have a search problem for which the solution
+space can be expressed as a lattice. JHPL supports lattices with up to ```2^63-1``` (```~9.223372 * 10^18```) elements and
+materialized information with up to $(2^31-1)*4 / (1024^3) \approx 8 GiB of memory. Of course,
 having such large lattices only makes sense if you do not need to store information about all elements. In particular, JHPL
 supports the concept of *predictive properties*.
 
