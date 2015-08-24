@@ -199,6 +199,56 @@ class JHPLTrie {
         // Terminate
         return true;
     }
+    
+    /*
+     * 
+    private boolean containsGEQ(int[] element) {
+
+        // Init
+        int[] stackDimension = new int[element.length];
+        int[] stackOffset = new int[element.length];
+        int[] stackIndex = new int[element.length];
+        stackOffset[0] = element[0];
+        int stackPointer = 0;
+
+        // For each
+        while (stackPointer != -1) {
+            
+            // Pop 
+            if (stackIndex[stackPointer] >= heights[stackDimension[stackPointer]] - element[stackDimension[stackPointer]]) {
+                stackPointer--;
+                continue;
+            }
+            
+            // Check and increment
+            int pointer = buffer.memory[stackOffset[stackPointer] + stackIndex[stackPointer]];
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                stackIndex[stackPointer]++;
+                continue;
+                
+            // Found
+            } else if (stackDimension[stackPointer] == dimensions - 1) {
+                return true;
+                
+            // Recursion
+            } else {
+                
+                // Increment index
+                stackIndex[stackPointer]++;
+
+                // Push
+                stackPointer++;
+                stackDimension[stackPointer] = stackDimension[stackPointer - 1] + 1;
+                stackIndex[stackPointer] = 0;
+                stackOffset[stackPointer] = pointer + element[stackDimension[stackPointer]];
+                continue;
+            }
+        }
+        
+        // Not found
+        return false;
+    }
+     */
 
     /**
      * Queries this trie for the given element
@@ -212,12 +262,10 @@ class JHPLTrie {
         // Init
         offset += element[dimension];
 
-        // Find
-        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
-
         // Foreach
         for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
-            pointer = buffer.memory[offset + i];
+            
+            int pointer = buffer.memory[offset + i];
 
             // Terminate
             if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
@@ -228,7 +276,9 @@ class JHPLTrie {
                 return true;
 
                 // Recursion
-            } else if (containsGEQ(element, dimension + 1, pointer)) { return true; }
+            } else if (containsGEQ(element, dimension + 1, pointer)) { 
+                return true; 
+            }
         }
         return false;
 
@@ -246,12 +296,10 @@ class JHPLTrie {
         // Init
         offset += element[dimension];
 
-        // Find
-        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
-
         // Foreach
         for (int i = 0; i <= element[dimension]; i++) {
-            pointer = buffer.memory[offset - i];
+            
+            int pointer = buffer.memory[offset - i];
 
             // Terminate
             if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
@@ -262,7 +310,9 @@ class JHPLTrie {
                 return true;
 
                 // Recursion
-            } else if (containsLEQ(element, dimension + 1, pointer)) { return true; }
+            } else if (containsLEQ(element, dimension + 1, pointer)) { 
+                return true; 
+            }
         }
         return false;
     }
