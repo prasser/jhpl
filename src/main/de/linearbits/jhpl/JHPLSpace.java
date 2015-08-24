@@ -302,8 +302,13 @@ public class JHPLSpace<T> {
      * @return
      */
     public int[] toIndex(long id) {
-        checkId(id);
-        return toIndex(new int[dimensions], id);
+        int[] result = new int[dimensions];
+        for (int i = 0; i < dimensions; i++) {
+            long mult = multiplier[i];
+            result[i] = (int)(id / mult);
+            id %= mult;
+        }
+        return result;
     }
 
     /**
