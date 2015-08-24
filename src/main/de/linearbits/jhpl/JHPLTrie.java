@@ -164,83 +164,106 @@ class JHPLTrie {
         }
         this.buffer.replace(other.buffer);
     }
-    
+
     /**
      * Queries this trie for the given element
+     * 
      * @param element
      * @param dimension
      * @param offset
-     * @param comparator
      */
-    private boolean contains(int[] element, int dimension, int offset, ElementComparator comparator) {
-        
+    private boolean containsEQ(int[] element, int dimension, int offset) {
+
         // Init
         offset += element[dimension];
-        
+
         // Find
         int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
-        switch (comparator) {
-        case EQ:
-            pointer = buffer.memory[offset];
-            
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                return false;
+
+        pointer = buffer.memory[offset];
+
+        // Terminate
+        if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+            return false;
 
             // Terminate
-            } else if (dimension == dimensions - 1){
-                return true;
-                
+        } else if (dimension == dimensions - 1) {
+            return true;
+
             // Recursion
-            } else {
-                return contains(element, dimension + 1, pointer, comparator);
-            }
-            
-        case GEQ:
-            
-            // Foreach
-            for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
-                pointer = buffer.memory[offset + i];
-                
-                // Terminate
-                if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    continue;
-
-                // Terminate
-                } else if (dimension == dimensions - 1){
-                    return true;
-                    
-                // Recursion
-                } else if (contains(element, dimension + 1, pointer, comparator)) {
-                    return true;
-                }
-            }
-            return false;
-        case LEQ:
-            
-            // Foreach
-            for (int i = 0; i <= element[dimension]; i++) {
-                pointer = buffer.memory[offset - i];
-
-                // Terminate
-                if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    continue;
-
-                // Terminate
-                } else if (dimension == dimensions - 1){
-                    return true;
-                    
-                // Recursion
-                } else if (contains(element, dimension + 1, pointer, comparator)) {
-                    return true;
-                }
-            }
-            return false;
-        default:
-            throw new IllegalStateException("Unknown comparator");
+        } else {
+            return containsEQ(element, dimension + 1, pointer);
         }
+
     }
 
+    /**
+     * Queries this trie for the given element
+     * 
+     * @param element
+     * @param dimension
+     * @param offset
+     */
+    private boolean containsGEQ(int[] element, int dimension, int offset) {
+
+        // Init
+        offset += element[dimension];
+
+        // Find
+        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
+
+        // Foreach
+        for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
+            pointer = buffer.memory[offset + i];
+
+            // Terminate
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                continue;
+
+                // Terminate
+            } else if (dimension == dimensions - 1) {
+                return true;
+
+                // Recursion
+            } else if (containsGEQ(element, dimension + 1, pointer)) { return true; }
+        }
+        return false;
+
+    }
+
+    /**
+     * Queries this trie for the given element
+     * 
+     * @param element
+     * @param dimension
+     * @param offset
+     */
+    private boolean containsLEQ(int[] element, int dimension, int offset) {
+
+        // Init
+        offset += element[dimension];
+
+        // Find
+        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
+
+        // Foreach
+        for (int i = 0; i <= element[dimension]; i++) {
+            pointer = buffer.memory[offset - i];
+
+            // Terminate
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                continue;
+
+                // Terminate
+            } else if (dimension == dimensions - 1) {
+                return true;
+
+                // Recursion
+            } else if (containsLEQ(element, dimension + 1, pointer)) { return true; }
+        }
+        return false;
+    }
+    
     /**
      * Helper for putting an element into this trie
      * @param element
@@ -333,7 +356,17 @@ class JHPLTrie {
      * @return
      */
     boolean contains(int[] node, ElementComparator comparator) {
-        return contains(node, 0, 0, comparator);
+        
+        switch (comparator) {
+        case EQ:
+            return containsEQ(node, 0, 0);
+        case GEQ:
+            return containsGEQ(node, 0, 0);
+        case LEQ:
+            return containsLEQ(node, 0, 0);
+        default:
+            throw new IllegalStateException("Unknown comparator");
+        }
     }
     
     /**
