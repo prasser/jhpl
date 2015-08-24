@@ -172,29 +172,32 @@ class JHPLTrie {
      * @param dimension
      * @param offset
      */
-    private boolean containsEQ(int[] element, int dimension, int offset) {
-
+    private boolean containsEQ(int[] element) {
+        
         // Init
-        offset += element[dimension];
-
-        // Find
-        int pointer = JHPLBuffer.FLAG_NOT_AVAILABLE;
-
-        pointer = buffer.memory[offset];
-
-        // Terminate
-        if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-            return false;
-
+        int offset = 0;
+        
+        // Foreach
+        for (int dimension = 0; dimension < element.length; dimension++) {
+    
+            // Increment
+            offset += element[dimension];
+    
+            // Find
+            int pointer = buffer.memory[offset];
+    
             // Terminate
-        } else if (dimension == dimensions - 1) {
-            return true;
-
-            // Recursion
-        } else {
-            return containsEQ(element, dimension + 1, pointer);
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                return false;
+                
+            // Next
+            } else {
+                offset = pointer;
+            }
         }
-
+        
+        // Terminate
+        return true;
     }
 
     /**
@@ -359,7 +362,7 @@ class JHPLTrie {
         
         switch (comparator) {
         case EQ:
-            return containsEQ(node, 0, 0);
+            return containsEQ(node);
         case GEQ:
             return containsGEQ(node, 0, 0);
         case LEQ:
