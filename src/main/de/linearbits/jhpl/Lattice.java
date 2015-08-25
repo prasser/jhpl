@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
+import de.linearbits.jhpl.JHPLIterator.LongIterator;
 import de.linearbits.jhpl.JHPLIterator.WrappedIntArrayIterator;
-import de.linearbits.jhpl.JHPLIterator.WrappedLongIterator;
+import de.linearbits.jhpl.JHPLIterator.WrappedPrimitiveLongIterator;
+import de.linearbits.jhpl.JHPLStack.IntegerStack;
+import de.linearbits.jhpl.JHPLStack.LongStack;
 import de.linearbits.jhpl.JHPLTrie.ElementComparator;
 import de.linearbits.jhpl.PredictiveProperty.Direction;
 
@@ -263,8 +265,8 @@ public class Lattice<T, U> {
      * Enumerates all nodes stored in the lattice
      * @return
      */
-    public Iterator<Long> listNodesAsIdentifiers() {
-        return new WrappedLongIterator(this, this.master.iteratorLong(this.nodes.getMultiplier()));
+    public LongIterator listNodesAsIdentifiers() {
+        return new WrappedPrimitiveLongIterator(this, this.master.iteratorLong(this.nodes.getMultiplier()));
     }
 
     /**
@@ -546,14 +548,14 @@ public class Lattice<T, U> {
      * not implemented. Simply iterate until <code>null</code> is returned.
      * @return
      */
-    private Iterator<Long> listAllNodesAsIdentifiersImpl(final int level, final long[] multiplier) {
+    private LongIterator listAllNodesAsIdentifiersImpl(final int level, final long[] multiplier) {
 
         // Initialize
-        final Stack<Long> identifiers = new Stack<Long>();
         final int[] heights = this.nodes.getHeights();
         final int dimensions = this.nodes.getDimensions();
         final int[] element = new int[dimensions];
-        final JHPLStack offsets = new JHPLStack(dimensions);
+        final LongStack identifiers = new LongStack(dimensions);
+        final IntegerStack offsets = new IntegerStack(dimensions);
         final int[] mins = new int[dimensions];
         
         // Determine minimal indices
@@ -568,7 +570,7 @@ public class Lattice<T, U> {
         element[0] = 0;
         
         // Return
-        return new Iterator<Long>() {
+        return new LongIterator() {
 
             /** Current level*/
             int current = 0;
@@ -576,7 +578,7 @@ public class Lattice<T, U> {
             @Override public boolean hasNext() { throw new UnsupportedOperationException(); }
 
             @Override
-            public Long next() {
+            public long next() {
                 
                 // Iterate
                 while (true) {
@@ -589,7 +591,7 @@ public class Lattice<T, U> {
                         offsets.pop();
                         identifiers.pop();
                         if (offsets.empty()) {
-                            return null;
+                            return -1;
                         }
                     }
                     
@@ -611,7 +613,6 @@ public class Lattice<T, U> {
                     }
                 }
             }
-            @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
 
@@ -620,23 +621,23 @@ public class Lattice<T, U> {
      * not implemented. Simply iterate until <code>null</code> is returned.
      * @return
      */
-    private Iterator<Long> listAllNodesAsIdentifiersImpl(final long[] multiplier) {
+    private LongIterator listAllNodesAsIdentifiersImpl(final long[] multiplier) {
 
         // Initialize
-        final Stack<Long> identifiers = new Stack<Long>();
         final int[] heights = this.nodes.getHeights();
         final int dimensions = this.nodes.getDimensions();
-        final JHPLStack offsets = new JHPLStack(dimensions);
+        final LongStack identifiers = new LongStack(dimensions);
+        final IntegerStack offsets = new IntegerStack(dimensions);
         offsets.push(0);
         identifiers.push(0L);
         
         // Return
-        return new Iterator<Long>() {
+        return new LongIterator() {
             
             @Override public boolean hasNext() { throw new UnsupportedOperationException(); }
 
             @Override
-            public Long next() {
+            public long next() {
                 
                 // Iterate
                 while (true) {
@@ -646,7 +647,7 @@ public class Lattice<T, U> {
                         offsets.pop();
                         identifiers.pop();
                         if (offsets.empty()) {
-                            return null;
+                            return -1;
                         }
                     }
                     
@@ -665,7 +666,6 @@ public class Lattice<T, U> {
                     }
                 }
             }
-            @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
 
@@ -681,7 +681,7 @@ public class Lattice<T, U> {
         final int[] heights = this.nodes.getHeights();
         final int dimensions = this.nodes.getDimensions();
         final int[] element = new int[dimensions];
-        final JHPLStack offsets = new JHPLStack(dimensions);
+        final IntegerStack offsets = new IntegerStack(dimensions);
         offsets.push(0);
         element[0] = 0;
         
@@ -733,7 +733,7 @@ public class Lattice<T, U> {
         final int[] heights = this.nodes.getHeights();
         final int dimensions = this.nodes.getDimensions();
         final int[] element = new int[dimensions];
-        final JHPLStack offsets = new JHPLStack(dimensions);
+        final IntegerStack offsets = new IntegerStack(dimensions);
         final int[] mins = new int[dimensions];
         
         // Determine minimal indices
@@ -873,16 +873,16 @@ public class Lattice<T, U> {
      * Enumerates all nodes regardless of whether or not they are stored in the lattice
      * @return
      */
-    Iterator<Long> listAllNodesAsIdentifiers() {
-        return new WrappedLongIterator(null, this.listAllNodesAsIdentifiersImpl(nodes.getMultiplier()));
+    LongIterator listAllNodesAsIdentifiers() {
+        return new WrappedPrimitiveLongIterator(null, this.listAllNodesAsIdentifiersImpl(nodes.getMultiplier()));
     }
 
     /**
      * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice
      * @return
      */
-    Iterator<Long> listAllNodesAsIdentifiers(int level) {
-        return new WrappedLongIterator(null, this.listAllNodesAsIdentifiersImpl(level, nodes.getMultiplier()));
+    LongIterator listAllNodesAsIdentifiers(int level) {
+        return new WrappedPrimitiveLongIterator(null, this.listAllNodesAsIdentifiersImpl(level, nodes.getMultiplier()));
     }
 
     /**

@@ -19,69 +19,141 @@ import java.util.Arrays;
  */
 class JHPLStack {
 
-    /** Buffer*/
-    private final int[] buffer;
-    /** Pointer*/
-    private int size = 0;
-    
-    /**
-     * Creates a new instance
-     * @param size
-     */
-    JHPLStack(int size) {
-        buffer = new int[size];
-    }
-    
-    @Override
-    public String toString() {
-        return Arrays.toString(buffer) + " (" + size + ")";
-    }
-    
-    /**
-     * Returns whether this stack is empty
-     * @return
-     */
-    boolean empty() {
-        return size == 0;
+    public static class IntegerStack {
+
+        /** Buffer*/
+        private final int[] buffer;
+        /** Pointer*/
+        private int size = 0;
+        
+        /**
+         * Creates a new instance
+         * @param size
+         */
+        IntegerStack(int size) {
+            buffer = new int[size];
+        }
+        
+        @Override
+        public String toString() {
+            return Arrays.toString(buffer) + " (" + size + ")";
+        }
+        
+        /**
+         * Returns whether this stack is empty
+         * @return
+         */
+        boolean empty() {
+            return size == 0;
+        }
+
+        /**
+         * Increment
+         * @return
+         */
+        void inc() {
+            buffer[size - 1]++;
+        }
+
+        /**
+         * Peek
+         * @return
+         */
+        int peek() {
+            return buffer[size - 1];
+        }
+        /**
+         * Pop
+         * @return
+         */
+        int pop() {
+            int val = buffer[--size];
+            return val;
+        }
+
+        /**
+         * Push
+         * @param element
+         */
+        void push(int element) {
+            buffer[size++] = element;
+        }
+        
+        /**
+         * Returns the size
+         * @return
+         */
+        int size() {
+            return size;
+        }
     }
 
-    /**
-     * Increment
-     * @return
-     */
-    void inc() {
-        buffer[size - 1]++;
-    }
+    public static class LongStack {
 
-    /**
-     * Peek
-     * @return
-     */
-    int peek() {
-        return buffer[size - 1];
-    }
-    /**
-     * Pop
-     * @return
-     */
-    int pop() {
-        int val = buffer[--size];
-        return val;
-    }
+        /** Buffer*/
+        private final long[] buffer;
+        /** Pointer*/
+        private int size = 0;
+        
+        /**
+         * Creates a new instance
+         * @param size
+         */
+        LongStack(int size) {
+            buffer = new long[size];
+        }
+        
+        @Override
+        public String toString() {
+            return Arrays.toString(buffer) + " (" + size + ")";
+        }
+        
+        /**
+         * Returns whether this stack is empty
+         * @return
+         */
+        boolean empty() {
+            return size == 0;
+        }
 
-    /**
-     * Push
-     * @param element
-     */
-    void push(int element) {
-        buffer[size++] = element;
-    }
-    
-    /**
-     * Returns the size
-     * @return
-     */
-    int size() {
-        return size;
+        /**
+         * Increment
+         * @return
+         */
+        void inc() {
+            buffer[size - 1]++;
+        }
+
+        /**
+         * Peek
+         * @return
+         */
+        long peek() {
+            return buffer[size - 1];
+        }
+        /**
+         * Pop
+         * @return
+         */
+        long pop() {
+            long val = buffer[--size];
+            return val;
+        }
+
+        /**
+         * Push
+         * @param element
+         */
+        void push(long element) {
+            buffer[size++] = element;
+        }
+        
+        /**
+         * Returns the size
+         * @return
+         */
+        int size() {
+            return size;
+        }
     }
 }

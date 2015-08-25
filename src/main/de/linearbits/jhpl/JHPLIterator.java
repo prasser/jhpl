@@ -207,4 +207,67 @@ class JHPLIterator {
             throw new UnsupportedOperationException();
         }
     }
+    
+    /**
+     * Long iterator
+     * @author prasser
+     *
+     */
+    public static interface LongIterator {
+        public boolean hasNext();
+        public long next();
+    }
+
+    /**
+     * Long iterator
+     * @author prasser
+     */
+    public static class WrappedPrimitiveLongIterator implements LongIterator {
+
+        /** Iterator */
+        private LongIterator        iter;
+        /** Next element */
+        private long                next   = -1;
+        /** Have we already pulled the next element */
+        private boolean             pulled = true;
+        /** Lattice */
+        private final Lattice<?, ?> lattice;
+
+        /**
+         * Constructs a new instance
+         * @param iterator
+         */
+        WrappedPrimitiveLongIterator(Lattice<?, ?> lattice, LongIterator iterator){
+            this.iter = iterator;
+            this.next = iter.next();
+            this.lattice = lattice;
+            if (this.lattice != null) {
+                this.lattice.setUnmodified();
+            }
+        }
+        
+        @Override 
+        public boolean hasNext() {
+            if (lattice != null && lattice.isModified()) {
+                throw new ConcurrentModificationException();
+            }
+            if (!pulled) {
+                next = iter.next();
+                pulled = true;
+            }
+            return next != -1;
+        }
+        
+        @Override
+        public long next() {
+            if (lattice != null && lattice.isModified()) {
+                throw new ConcurrentModificationException();
+            }
+            if (!pulled) {
+                next = iter.next();
+            }
+            pulled = false;
+            return next;
+        }
+    }
 }

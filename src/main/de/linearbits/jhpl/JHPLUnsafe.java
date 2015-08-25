@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import de.linearbits.jhpl.JHPLIterator.ConditionalIntArrayIterator;
 import de.linearbits.jhpl.JHPLIterator.IntArrayCondition;
+import de.linearbits.jhpl.JHPLIterator.LongIterator;
 
 /**
  * This class provides methods that may not be safe to use on very large lattices because their complexity grows
@@ -55,7 +56,7 @@ public class JHPLUnsafe {
      * Enumerates all nodes regardless of whether or not they are stored in the lattice
      * @return
      */
-    public Iterator<Long> listAllNodesAsIdentifiers() {
+    public LongIterator listAllNodesAsIdentifiers() {
         return lattice.listAllNodesAsIdentifiers();
     }
 
@@ -63,7 +64,7 @@ public class JHPLUnsafe {
      * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice
      * @return
      */
-    public Iterator<Long> listAllNodesAsIdentifiers(int level) {
+    public LongIterator listAllNodesAsIdentifiers(int level) {
         return lattice.listAllNodesAsIdentifiers(level);
     }
     

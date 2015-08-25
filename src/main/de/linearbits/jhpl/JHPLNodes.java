@@ -17,6 +17,7 @@ import java.util.Iterator;
 
 import de.linearbits.jhpl.JHPLIterator.ConditionalIntArrayIterator;
 import de.linearbits.jhpl.JHPLIterator.IntArrayCondition;
+import de.linearbits.jhpl.JHPLIterator.LongIterator;
 
 /**
  * This class implements methods for working with nodes.
@@ -203,9 +204,9 @@ public class JHPLNodes<T> {
      * @param node
      * @return
      */
-    public Iterator<Long> listPredecessors(final long _id) {
+    public LongIterator listPredecessors(final long _id) {
 
-        return new Iterator<Long>() {
+        return new LongIterator() {
             
             // State
             long id = _id;
@@ -220,15 +221,10 @@ public class JHPLNodes<T> {
             }
             
             @Override
-            public Long next() {
+            public long next() {
                 long result = next;
                 next = pull();
                 return result;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Not implemented");
             }
 
             /**
@@ -370,9 +366,9 @@ public class JHPLNodes<T> {
      * @param node
      * @return
      */
-    public Iterator<Long> listSuccessors(final long _id) {
+    public LongIterator listSuccessors(final long _id) {
         
-        return new Iterator<Long>() {
+        return new LongIterator() {
             
             // State
             long id = _id;
@@ -387,15 +383,10 @@ public class JHPLNodes<T> {
             }
             
             @Override
-            public Long next() {
+            public long next() {
                 long result = next;
                 next = pull();
                 return result;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Not implemented");
             }
 
             /**

@@ -16,7 +16,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
+
+import de.linearbits.jhpl.JHPLIterator.LongIterator;
+import de.linearbits.jhpl.JHPLStack.IntegerStack;
+import de.linearbits.jhpl.JHPLStack.LongStack;
 
 /**
  * This class implements a simple trie for integers that is materialized in a backing integer array
@@ -739,8 +742,8 @@ class JHPLTrie {
         
         // Initialize
         final int[] element = new int[this.dimensions];
-        final JHPLStack offsets = new JHPLStack(this.dimensions);
-        final JHPLStack pointers = new JHPLStack(this.dimensions);
+        final IntegerStack offsets = new IntegerStack(this.dimensions);
+        final IntegerStack pointers = new IntegerStack(this.dimensions);
         offsets.push(0);
         pointers.push(0);
         element[0] = 0;
@@ -798,8 +801,8 @@ class JHPLTrie {
         
         // Initialize
         final int[] element = new int[this.dimensions];
-        final JHPLStack offsets = new JHPLStack(this.dimensions);
-        final JHPLStack pointers = new JHPLStack(this.dimensions);
+        final IntegerStack offsets = new IntegerStack(this.dimensions);
+        final IntegerStack pointers = new IntegerStack(this.dimensions);
         final int[] mins = new int[this.dimensions];
         offsets.push(0);
         pointers.push(0);
@@ -874,23 +877,23 @@ class JHPLTrie {
      * <code>null</code> is returned.
      * @return
      */
-    Iterator<Long> iteratorLong(final long[] multiplier) {
+    LongIterator iteratorLong(final long[] multiplier) {
 
         // Initialize
-        final Stack<Long> identifiers = new Stack<Long>();
-        final JHPLStack offsets = new JHPLStack(this.dimensions);
-        final JHPLStack pointers = new JHPLStack(this.dimensions);
+        final LongStack identifiers = new LongStack(this.dimensions);
+        final IntegerStack offsets = new IntegerStack(this.dimensions);
+        final IntegerStack pointers = new IntegerStack(this.dimensions);
         offsets.push(0);
         pointers.push(0);
         identifiers.push(0L);
         
         // Return
-        return new Iterator<Long>() {
+        return new LongIterator() {
             
             @Override public boolean hasNext() { throw new UnsupportedOperationException(); }
 
             @Override
-            public Long next() {
+            public long next() {
                 
                 // Iteratively traverse the trie
                 while (true) {
@@ -902,7 +905,7 @@ class JHPLTrie {
                         pointers.pop();
                         identifiers.pop();
                         if (offsets.empty()) {
-                            return null;
+                            return -1;
                         }
                     }
                     
@@ -927,7 +930,6 @@ class JHPLTrie {
                     }
                 }
             }
-            @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
 
