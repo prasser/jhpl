@@ -39,6 +39,8 @@ public class JHPLNodes<T> {
     private final int[]         top;
     /** Lattice */
     private final Lattice<T, ?> lattice;
+    /** Multiplier */
+    private final long[]        multiplier;
 
     /**
      * Creates a new instance
@@ -58,6 +60,11 @@ public class JHPLNodes<T> {
         }
         this.elements = elements;
         this.lattice = lattice;
+        this.multiplier = new long[this.dimensions];
+        this.multiplier[elements.length - 1] = 1;
+        for (int i = elements.length - 2; i >= 0; i--) {
+            this.multiplier[i] = this.elements[i + 1].length * this.multiplier[i + 1];
+        }
     }
 
     /**
@@ -97,6 +104,29 @@ public class JHPLNodes<T> {
             level += dimension;
         }
         return level;
+    }
+
+    /**
+     * Returns the level of the given node
+     * @param id
+     * @return
+     */
+    public int getLevel(long id) {
+        int level = 0;
+        for (int i = 0; i < dimensions; i++) {
+            long mult = multiplier[i];
+            level += (int)(id / mult);
+            id %= mult;
+        }
+        return level;
+    }
+
+    /**
+     * Multiplier
+     * @return
+     */
+    public long[] getMultiplier() {
+        return this.multiplier;
     }
 
     /**
@@ -146,7 +176,7 @@ public class JHPLNodes<T> {
         }
         return diff != 0;
     }
-
+    
     /**
      * Determines whether the arrays represent the same node
      * @param parent
@@ -166,6 +196,65 @@ public class JHPLNodes<T> {
      */
     public Iterator<int[]> listPredecessors(int[] node) {
         return listPredecessors(new int[dimensions], node);
+    }
+
+    /**
+     * Returns an iterator over all predecessors
+     * @param node
+     * @return
+     */
+    public Iterator<Long> listPredecessors(final long _id) {
+
+        return new Iterator<Long>() {
+            
+            // State
+            long id = _id;
+            // State
+            int dimension = 0;
+            // State
+            long next = pull();
+            
+            @Override
+            public boolean hasNext() {
+                return next >= 0;
+            }
+            
+            @Override
+            public Long next() {
+                long result = next;
+                next = pull();
+                return result;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not implemented");
+            }
+
+            /**
+             * Returns the id of the next element, returns a negative value if there is no such element
+             * @return
+             */
+            private long pull() {
+
+                long value, result = -1;
+                
+                while (dimension < dimensions) {
+                    long mult = multiplier[dimension];
+                    value = id / mult - 1;
+                    id = id % mult;
+                    result = _id - mult;
+                    dimension++;
+                    if (value >= 0) {
+                        break;
+                    } else {
+                        result = -1;
+                    }
+                } 
+                
+                return result;
+            }
+        };
     }
 
     /**
@@ -277,6 +366,65 @@ public class JHPLNodes<T> {
     
 
     /**
+     * Returns an iterator over all successors
+     * @param node
+     * @return
+     */
+    public Iterator<Long> listSuccessors(final long _id) {
+        
+        return new Iterator<Long>() {
+            
+            // State
+            long id = _id;
+            // State
+            int dimension = 0;
+            // State
+            long next = pull();
+            
+            @Override
+            public boolean hasNext() {
+                return next >= 0;
+            }
+            
+            @Override
+            public Long next() {
+                long result = next;
+                next = pull();
+                return result;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not implemented");
+            }
+
+            /**
+             * Returns the id of the next element, returns a negative value if there is no such element
+             * @return
+             */
+            private long pull() {
+
+                long value, result = -1;
+                
+                while (dimension < dimensions) {
+                    long mult = multiplier[dimension];
+                    value = id / mult + 1;
+                    id = id % mult;
+                    result = _id + mult;
+                    dimension++;
+                    if (value < heights[dimension - 1]) {
+                        break;
+                    } else { 
+                        result = -1;
+                    }
+                } 
+                
+                return result;
+            }
+        };
+    }
+
+    /**
      * Lists all successors not stored in the lattice
      * @return
      */
@@ -360,7 +508,8 @@ public class JHPLNodes<T> {
                 return lattice.hasProperty(array, property);
             }
         });
-    }
+    }   
+    
 
     /**
      * Lists all successors with any property or which have been stored in the lattice
@@ -372,7 +521,7 @@ public class JHPLNodes<T> {
                 return lattice.hasProperty(array) || lattice.contains(array);
             }
         });
-    }   
+    }
     
 
     /**
@@ -452,7 +601,7 @@ public class JHPLNodes<T> {
             }
         };
     }
-    
+
 
     /**
      * Returns an iterator over all successors. Note: the iterator will always return the same array. Reuses the given array.
@@ -531,7 +680,6 @@ public class JHPLNodes<T> {
         };
     }
 
-
     /**
      * Checks the given array for boundary conditions
      * @param array
@@ -589,7 +737,7 @@ public class JHPLNodes<T> {
     int getDimensions() {
         return this.dimensions;
     }
-
+    
     /**
      * Heights
      * @return
@@ -597,5 +745,4 @@ public class JHPLNodes<T> {
     int[] getHeights() {
         return this.heights;
     }
-    
 }

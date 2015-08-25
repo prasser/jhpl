@@ -42,13 +42,29 @@ public class JHPLUnsafe {
     public Iterator<int[]> listAllNodes() {
         return lattice.listAllNodes();
     }
-    
+
     /**
      * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice
      * @return
      */
     public Iterator<int[]> listAllNodes(int level) {
         return lattice.listAllNodes(level);
+    }
+    
+    /**
+     * Enumerates all nodes regardless of whether or not they are stored in the lattice
+     * @return
+     */
+    public Iterator<Long> listAllNodesAsIdentifiers() {
+        return lattice.listAllNodesAsIdentifiers();
+    }
+
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice
+     * @return
+     */
+    public Iterator<Long> listAllNodesAsIdentifiers(int level) {
+        return lattice.listAllNodesAsIdentifiers(level);
     }
     
     /**

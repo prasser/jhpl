@@ -188,15 +188,28 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#hasProperty(long, de.linearbits.jhpl.PredictiveProperty)">hasProperty</a></strong>(long&nbsp;identifier,
+           <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
+<div class="block">Returns whether the given node has the given property.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#listNodes()">listNodes</a></strong>()</code>
 <div class="block">Enumerates all nodes stored in the lattice</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.util.Iterator&lt;int[]&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#listNodes(int)">listNodes</a></strong>(int&nbsp;level)</code>
 <div class="block">Enumerates all nodes stored on the given level</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Iterator&lt;java.lang.Long&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#listNodesAsIdentifiers()">listNodesAsIdentifiers</a></strong>()</code>
+<div class="block">Enumerates all nodes stored in the lattice</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -239,7 +252,21 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#putProperty(long, de.linearbits.jhpl.PredictiveProperty)">putProperty</a></strong>(long&nbsp;identifier,
+           <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
+<div class="block">Stores the given property for the given node.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#removeProperty(int[], de.linearbits.jhpl.PredictiveProperty)">removeProperty</a></strong>(int[]&nbsp;node,
+              <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
+<div class="block">Clears the given property for the given node.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../de/linearbits/jhpl/Lattice.html#removeProperty(long, de.linearbits.jhpl.PredictiveProperty)">removeProperty</a></strong>(long&nbsp;identifier,
               <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</code>
 <div class="block">Clears the given property for the given node.</div>
 </td>
@@ -368,6 +395,21 @@ extends java.lang.Object</pre>
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="hasProperty(long, de.linearbits.jhpl.PredictiveProperty)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasProperty</h4>
+<pre>public&nbsp;boolean&nbsp;hasProperty(long&nbsp;identifier,
+                  <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
+<div class="block">Returns whether the given node has the given property. <br>
+ <br>
+ This is a guaranteed O(1) operation for any node.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>node</code> - </dd><dd><code>property</code> - </dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="listNodes()">
 <!--   -->
 </a>
@@ -389,6 +431,17 @@ extends java.lang.Object</pre>
 <div class="block">Enumerates all nodes stored on the given level</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>level</code> - </dd>
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="listNodesAsIdentifiers()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listNodesAsIdentifiers</h4>
+<pre>public&nbsp;java.util.Iterator&lt;java.lang.Long&gt;&nbsp;listNodesAsIdentifiers()</pre>
+<div class="block">Enumerates all nodes stored in the lattice</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 <a name="nodes()">
@@ -470,6 +523,24 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>node</code> - </dd><dd><code>property</code> - </dd></dl>
 </li>
 </ul>
+<a name="putProperty(long, de.linearbits.jhpl.PredictiveProperty)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>putProperty</h4>
+<pre>public&nbsp;void&nbsp;putProperty(long&nbsp;identifier,
+               <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
+<div class="block">Stores the given property for the given node. If the property is predictive in an upwards direction, it 
+ will also be stored for all successors of the given node. If the property is predictive in a downwards direction,
+ it will also be stored for all predecessors of the given node.<br>
+ <br>
+ The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
+ Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
+ a complexity of amortized O(1).</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>node</code> - </dd><dd><code>property</code> - </dd></dl>
+</li>
+</ul>
 <a name="removeProperty(int[], de.linearbits.jhpl.PredictiveProperty)">
 <!--   -->
 </a>
@@ -477,6 +548,24 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>removeProperty</h4>
 <pre>public&nbsp;void&nbsp;removeProperty(int[]&nbsp;node,
+                  <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
+<div class="block">Clears the given property for the given node. If the property is predictive in an upwards direction, it 
+ will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
+ it will also be cleared for all predecessors of the given node.<br>
+ <br>
+ The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
+ Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
+ a complexity of amortized O(1).</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>node</code> - </dd><dd><code>property</code> - </dd></dl>
+</li>
+</ul>
+<a name="removeProperty(long, de.linearbits.jhpl.PredictiveProperty)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>removeProperty</h4>
+<pre>public&nbsp;void&nbsp;removeProperty(long&nbsp;identifier,
                   <a href="../../../de/linearbits/jhpl/PredictiveProperty.html" title="class in de.linearbits.jhpl">PredictiveProperty</a>&nbsp;property)</pre>
 <div class="block">Clears the given property for the given node. If the property is predictive in an upwards direction, it 
  will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
