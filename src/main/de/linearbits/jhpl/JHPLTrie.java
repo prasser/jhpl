@@ -397,29 +397,17 @@ class JHPLTrie {
      */
     private boolean containsGEQ(int[] element, int dimension, int offset) {
 
-        // Init
-        offset += element[dimension];
-
-        // Foreach
-        for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
-            
-            int pointer = buffer.memory[offset + i];
-
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                continue;
-
-                // Terminate
-            } else if (dimension == dimensions - 1) {
-                return true;
-
-                // Recursion
-            } else if (containsGEQ(element, dimension + 1, pointer)) { 
-                return true; 
+        if (dimension == dimensions) {
+            return true;
+        } else {
+            for (int i = element[dimension]; i < heights[dimension]; i++) {
+                int pointer = buffer.memory[offset + i];
+                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && containsGEQ(element, dimension + 1, pointer)) { 
+                    return true; 
+                }
             }
         }
         return false;
-
     }
 
     /**
@@ -468,25 +456,14 @@ class JHPLTrie {
      */
     private boolean containsLEQ(int[] element, int dimension, int offset) {
 
-        // Init
-        offset += element[dimension];
-
-        // Foreach
-        for (int i = 0; i <= element[dimension]; i++) {
-            
-            int pointer = buffer.memory[offset - i];
-
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                continue;
-
-                // Terminate
-            } else if (dimension == dimensions - 1) {
-                return true;
-
-                // Recursion
-            } else if (containsLEQ(element, dimension + 1, pointer)) { 
-                return true; 
+        if (dimension == dimensions) {
+            return true;          
+        } else {
+            for (int i = element[dimension]; i >= 0; i--) {
+                int pointer = buffer.memory[offset + i];
+                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && containsLEQ(element, dimension + 1, pointer)) { 
+                    return true; 
+                }
             }
         }
         return false;
