@@ -254,6 +254,54 @@ public class JHPLNodes<T> {
     }
 
     /**
+     * Returns all predecessors based on multiple precomputed values
+     * @param node
+     * @param identifier
+     * @return
+     */
+    public LongIterator listPredecessorsAsIdentifiers(final int[] node, final long identifier) {
+
+        return new LongIterator() {
+            
+            // State
+            int dimension = 0;
+            // State
+            long next = pull();
+            
+            @Override
+            public boolean hasNext() {
+                return next >= 0;
+            }
+            
+            @Override
+            public long next() {
+                long result = next;
+                next = pull();
+                return result;
+            }
+
+            /**
+             * Returns the id of the next element, returns a negative value if there is no such element
+             * @return
+             */
+            private long pull() {
+                long result = -1;
+                while (dimension < dimensions) {
+                    if (node[dimension] - 1 >= 0) {
+                        result = identifier - multiplier[dimension];
+                        dimension++;
+                        break;
+                    } else {
+                        result = -1;
+                        dimension++;
+                    }
+                } 
+                return result;
+            }
+        };
+    }
+
+    /**
      * Lists all predecessors not stored in the lattice
      * @return
      */
@@ -276,7 +324,7 @@ public class JHPLNodes<T> {
             }
         });
     }
-
+    
     /**
      * Lists all predecessors without any property
      * @return
@@ -288,7 +336,7 @@ public class JHPLNodes<T> {
             }
         });
     }
-    
+
     /**
      * Lists all predecessors without the given property
      * @param property
@@ -350,6 +398,7 @@ public class JHPLNodes<T> {
             }
         });
     }
+    
 
     /**
      * Returns an iterator over all successors. Note: the iterator will always return the same array
@@ -359,7 +408,6 @@ public class JHPLNodes<T> {
     public Iterator<int[]> listSuccessors(int[] node) {
         return listSuccessors(new int[dimensions], node);
     }
-    
 
     /**
      * Returns an iterator over all successors
@@ -410,6 +458,56 @@ public class JHPLNodes<T> {
                     }
                 } 
                 
+                return result;
+            }
+        };
+    }
+
+    /**
+     * Returns all successors based on multiple precomputed values
+     * @param node
+     * @param identifier
+     * @return
+     */
+    public LongIterator listSuccessorsAsIdentifiers(final int[] node, 
+                                                    final long identifier) {
+
+        return new LongIterator() {
+            
+            // State
+            int dimension = 0;
+            // State
+            long next = pull();
+            
+            @Override
+            public boolean hasNext() {
+                return next >= 0;
+            }
+            
+            @Override
+            public long next() {
+                long result = next;
+                next = pull();
+                return result;
+            }
+
+            /**
+             * Returns the id of the next element, returns a negative value if there is no such element
+             * @return
+             */
+            private long pull() {
+
+                long result = -1;
+                while (dimension < dimensions) {
+                    if (node[dimension] + 1 < heights[dimension]) {
+                        result = identifier + multiplier[dimension];
+                        dimension++;
+                        break;
+                    } else { 
+                        result = -1;
+                        dimension++;
+                    }
+                } 
                 return result;
             }
         };
@@ -474,7 +572,8 @@ public class JHPLNodes<T> {
                 return !lattice.hasProperty(array) && !lattice.contains(array);
             }
         });
-    }
+    }   
+    
 
     /**
      * Lists all successors with any property
@@ -487,6 +586,7 @@ public class JHPLNodes<T> {
             }
         });
     }
+    
 
     /**
      * Lists all successors with the given property
@@ -499,8 +599,8 @@ public class JHPLNodes<T> {
                 return lattice.hasProperty(array, property);
             }
         });
-    }   
-    
+    }
+
 
     /**
      * Lists all successors with any property or which have been stored in the lattice
@@ -513,7 +613,6 @@ public class JHPLNodes<T> {
             }
         });
     }
-    
 
     /**
      * Returns an iterator over all predecessors. Note: the iterator will always return the same array. Reuses the given array.
@@ -592,7 +691,6 @@ public class JHPLNodes<T> {
             }
         };
     }
-
 
     /**
      * Returns an iterator over all successors. Note: the iterator will always return the same array. Reuses the given array.
@@ -706,7 +804,7 @@ public class JHPLNodes<T> {
             }
         }
     }
-
+    
     /**
      * Checks the given array for boundary conditions
      * @param array
@@ -728,7 +826,7 @@ public class JHPLNodes<T> {
     int getDimensions() {
         return this.dimensions;
     }
-    
+
     /**
      * Heights
      * @return
