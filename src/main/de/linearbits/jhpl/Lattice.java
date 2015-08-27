@@ -341,20 +341,12 @@ public class Lattice<T, U> {
         // Store in master trie
         this.master.put(node);
         
-        // Note: Don't remove this. It is very important for the whole thing to work correctly! Example: 
-        // Assume property A is predictive in an upwards direction.
-        // We first add property A for (1, 2, 1)
-        // We then add property A for (1, 3, 25). This will be caught by this check. 
-        // If not: we *query* for (1, 3, 20) and the result will be false 
+        // Reduce the amount of information stored in the trie
         if (hasProperty(node, property)) {
             return;
         }
 
-        // Note: Don't remove this. It is very important for the whole thing to work correctly! Example: 
-        // Assume property A is predictive in an upwards direction.
-        // We first add property A for (1, 3, 25)
-        // We then add property A for (1, 2, 1). This will be caught by this check. 
-        // If not: we *query* for (1, 3, 20) and the result will be false 
+        // Reduce the amount of information stored in the trie
         removeProperty(node, property);
         
         if (property.getDirection() == Direction.UP) {
@@ -388,20 +380,12 @@ public class Lattice<T, U> {
         // Store in master trie
         this.master.put(identifier, nodes.getMultiplier());
         
-        // Note: Don't remove this. It is very important for the whole thing to work correctly! Example: 
-        // Assume property A is predictive in an upwards direction.
-        // We first add property A for (1, 2, 1)
-        // We then add property A for (1, 3, 25). This will be caught by this check. 
-        // If not: we *query* for (1, 3, 20) and the result will be false 
+        // Reduce the amount of information stored in the trie
         if (hasProperty(identifier, property)) {
             return;
         }
 
-        // Note: Don't remove this. It is very important for the whole thing to work correctly! Example: 
-        // Assume property A is predictive in an upwards direction.
-        // We first add property A for (1, 3, 25)
-        // We then add property A for (1, 2, 1). This will be caught by this check. 
-        // If not: we *query* for (1, 3, 20) and the result will be false 
+        // Reduce the amount of information stored in the trie
         removeProperty(identifier, property);
         
         if (property.getDirection() == Direction.UP) {
@@ -417,69 +401,12 @@ public class Lattice<T, U> {
     }
     
     /**
-     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be cleared for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    public void removeProperty(int[] node, PredictiveProperty property) {
-
-        checkProperty(property);
-        this.nodes.checkNode(node);
-        this.setModified();
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
-        } else {
-            this.propertiesNone.get(property).put(space().toId(node), null);
-        }
-    }
-
-    /**
-     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be cleared for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    public void removeProperty(long identifier, PredictiveProperty property) {
-
-        this.setModified();
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else {
-            this.propertiesNone.get(property).put(identifier, null);
-        }
-    }
-    
-    /**
      * Returns a class for mapping between spaces
      * @return
      */
     public JHPLSpace<T> space() {
         return space;
     }
-    
 
     @Override
     public String toString() {
@@ -511,6 +438,7 @@ public class Lattice<T, U> {
         return this.unsafe;
     }
     
+
     /**
      * Internal method that checks properties for validity
      * @param property
@@ -542,7 +470,7 @@ public class Lattice<T, U> {
             }
         }
     }
-
+    
     /**
      * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice. Note: hasNext() is
      * not implemented. Simply iterate until <code>null</code> is returned.
@@ -615,7 +543,7 @@ public class Lattice<T, U> {
             }
         };
     }
-
+    
     /**
      * Enumerates all nodes regardless of whether or not they are stored in the lattice. Note: hasNext() is
      * not implemented. Simply iterate until <code>null</code> is returned.
@@ -668,7 +596,6 @@ public class Lattice<T, U> {
             }
         };
     }
-
 
     /**
      * Enumerates all nodes regardless of whether or not they are stored in the lattice. Note: hasNext() is
@@ -792,7 +719,7 @@ public class Lattice<T, U> {
         };
     }
 
-    
+
     /**
      * Materializes the whole lattice
      * @param element
@@ -808,6 +735,61 @@ public class Lattice<T, U> {
                 element[dimension] = i;
                 materialize(element, level + i, heights, dimension + 1, trie);
             }
+        }
+    }
+
+    /**
+     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
+     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
+     * it will also be cleared for all predecessors of the given node.<br>
+     * <br>
+     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
+     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
+     * a complexity of amortized O(1). 
+     * 
+     * @param node
+     * @param property
+     */
+    private void removeProperty(int[] node, PredictiveProperty property) {
+
+        this.setModified();
+        if (property.getDirection() == Direction.UP) {
+            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
+        } else if (property.getDirection() == Direction.DOWN) {
+            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
+        } else if (property.getDirection() == Direction.BOTH) {
+            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
+            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
+        } else {
+            this.propertiesNone.get(property).put(space().toId(node), null);
+        }
+    }
+
+    
+    /**
+     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
+     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
+     * it will also be cleared for all predecessors of the given node.<br>
+     * <br>
+     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
+     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
+     * a complexity of amortized O(1). 
+     * 
+     * @param node
+     * @param property
+     */
+    private void removeProperty(long identifier, PredictiveProperty property) {
+
+        this.setModified();
+        if (property.getDirection() == Direction.UP) {
+            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
+        } else if (property.getDirection() == Direction.DOWN) {
+            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
+        } else if (property.getDirection() == Direction.BOTH) {
+            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
+            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
+        } else {
+            this.propertiesNone.get(property).put(identifier, null);
         }
     }
 
