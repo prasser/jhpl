@@ -20,29 +20,29 @@ import de.linearbits.jhpl.PredictiveProperty.Direction;
  * @author Fabian Prasser
  *
  */
-public class Test4 {
+public class Test16 {
 
     /**
      * Main
      * @param args
      */
     public static void main(String[] args) {
-        test4();
+        test15();
     }
 
     /**
      * Test method
      */
-    private static void test4() {
+    private static void test15() {
         
         System.out.println("");
         System.out.println("**************************");
-        System.out.println("* TEST    4              *");
+        System.out.println("* TEST    16             *");
         System.out.println("**************************");
         System.out.println("");
         
         // Elements per dimension
-        String[][] elements = new String[][]{ {"A", "B", "C", "D"},
+        String[][] elements = new String[][]{ {"A", "B"},
                                               {"A", "B"},
                                               {"A", "B", "C"}};
 
@@ -52,12 +52,9 @@ public class Test4 {
         // Store a predictive property
         PredictiveProperty property1 = new PredictiveProperty("Property1", Direction.UP);
 
-        lattice.putProperty(lattice.nodes().build().next("B").next("B").next("C").create(), property1);
-        
-        System.out.println(lattice.hasProperty(lattice.nodes().getTop(), property1));
-        
-        lattice.putProperty(lattice.nodes().getBottom(), property1);
-
-        System.out.println(lattice.hasProperty(lattice.nodes().build().next("B").next("B").next("B").create(), property1));
+        lattice.putProperty(lattice.nodes().build().next("A").next("A").next("B").create(), property1);
+        System.out.println("TRUE: "+lattice.hasProperty(lattice.nodes().build().next("B").next("A").next("C").create(), property1));
+        lattice.putProperty(lattice.nodes().build().next("B").next("B").next("A").create(), property1);
+        System.out.println("TRUE: "+lattice.hasProperty(lattice.nodes().build().next("B").next("A").next("C").create(), property1));
     }    
 }
