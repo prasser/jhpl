@@ -22,7 +22,6 @@ import de.linearbits.jhpl.JHPLIterator.WrappedIntArrayIterator;
 import de.linearbits.jhpl.JHPLIterator.WrappedPrimitiveLongIterator;
 import de.linearbits.jhpl.JHPLStack.IntegerStack;
 import de.linearbits.jhpl.JHPLStack.LongStack;
-import de.linearbits.jhpl.JHPLTrie.ElementComparator;
 import de.linearbits.jhpl.PredictiveProperty.Direction;
 
 /**
@@ -123,7 +122,7 @@ public class Lattice<T, U> {
         this.propertiesUp = new HashMap<PredictiveProperty, JHPLTrie>();
         this.propertiesDown = new HashMap<PredictiveProperty, JHPLTrie>();
         this.propertiesNone = new HashMap<PredictiveProperty, JHPLMap<Boolean>>();
-        this.master = new JHPLTrie(this);
+        this.master = new JHPLTrieEQ(this);
         this.unsafe = new JHPLUnsafe(this);
     }
         
@@ -178,12 +177,12 @@ public class Lattice<T, U> {
     public boolean hasProperty(int[] node) {
         
         for (PredictiveProperty property : this.propertiesUp.keySet()) {
-            if (this.propertiesUp.get(property).contains(node, ElementComparator.LEQ)){
+            if (this.propertiesUp.get(property).contains(node)){
                 return true;
             }
         }
         for (PredictiveProperty property : this.propertiesDown.keySet()) {
-            if (this.propertiesDown.get(property).contains(node, ElementComparator.GEQ)){
+            if (this.propertiesDown.get(property).contains(node)){
                 return true;
             }
         }
@@ -207,38 +206,14 @@ public class Lattice<T, U> {
         checkProperty(property);
         this.nodes.checkNode(node);
         if (property.getDirection() == Direction.UP) {
-            return this.propertiesUp.get(property).contains(node, ElementComparator.LEQ);
+            return this.propertiesUp.get(property).contains(node);
         } else if (property.getDirection() == Direction.DOWN) {
-            return this.propertiesDown.get(property).contains(node, ElementComparator.GEQ);
+            return this.propertiesDown.get(property).contains(node);
         } else if (property.getDirection() == Direction.BOTH) {
-            return (this.propertiesUp.get(property).contains(node, ElementComparator.LEQ) || 
-                    this.propertiesDown.get(property).contains(node, ElementComparator.GEQ));
+            return (this.propertiesUp.get(property).contains(node) || 
+                    this.propertiesDown.get(property).contains(node));
         } else {
             Boolean result = this.propertiesNone.get(property).get(space().toId(node));
-            result = result == null ? false : result;
-            return result;
-        }
-    }
-
-    /**
-     * Returns whether the given node has the given property. <br>
-     * <br>
-     * This is a guaranteed O(1) operation for any node.
-     * @param node
-     * @param property
-     * @return
-     */
-    public boolean hasProperty(long identifier, PredictiveProperty property) {
-        checkProperty(property);
-        if (property.getDirection() == Direction.UP) {
-            return this.propertiesUp.get(property).contains(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            return this.propertiesDown.get(property).contains(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            return (this.propertiesUp.get(property).contains(identifier, ElementComparator.LEQ, nodes.getMultiplier()) || 
-                    this.propertiesDown.get(property).contains(identifier, ElementComparator.GEQ, nodes.getMultiplier()));
-        } else {
-            Boolean result = this.propertiesNone.get(property).get(identifier);
             result = result == null ? false : result;
             return result;
         }
@@ -360,45 +335,6 @@ public class Lattice<T, U> {
             this.propertiesNone.get(property).put(space().toId(node), true); 
         }
     }
-
-    /**
-     * Stores the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be stored for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be stored for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    public void putProperty(long identifier, PredictiveProperty property) {
-
-        this.setModified();
-        
-        // Store in master trie
-        this.master.put(identifier, nodes.getMultiplier());
-        
-        // Reduce the amount of information stored in the trie
-        if (hasProperty(identifier, property)) {
-            return;
-        }
-
-        // Reduce the amount of information stored in the trie
-        removeProperty(identifier, property);
-        
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).put(identifier, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).put(identifier, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).put(identifier, nodes.getMultiplier()); 
-            this.propertiesDown.get(property).put(identifier, nodes.getMultiplier());
-        } else {
-            this.propertiesNone.get(property).put(identifier, true); 
-        }
-    }
     
     /**
      * Returns a class for mapping between spaces
@@ -451,18 +387,18 @@ public class Lattice<T, U> {
         
         if (property.getDirection() == Direction.UP) {
             if (!this.propertiesUp.containsKey(property)) {
-                this.propertiesUp.put(property, new JHPLTrie(this));
+                this.propertiesUp.put(property, new JHPLTrieLEQ(this));
             }
         } else if (property.getDirection() == Direction.DOWN) {
             if (!this.propertiesDown.containsKey(property)) {
-                this.propertiesDown.put(property, new JHPLTrie(this));
+                this.propertiesDown.put(property, new JHPLTrieGEQ(this));
             }
         } else if (property.getDirection() == Direction.BOTH) {
             if (!this.propertiesUp.containsKey(property)) {
-                this.propertiesUp.put(property, new JHPLTrie(this));
+                this.propertiesUp.put(property, new JHPLTrieLEQ(this));
             }
             if (!this.propertiesDown.containsKey(property)) {
-                this.propertiesDown.put(property, new JHPLTrie(this));
+                this.propertiesDown.put(property, new JHPLTrieGEQ(this));
             }
         } else {
             if (!this.propertiesNone.containsKey(property)) {
@@ -754,42 +690,14 @@ public class Lattice<T, U> {
 
         this.setModified();
         if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
+            this.propertiesUp.get(property).clear(node);
         } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
+            this.propertiesDown.get(property).clear(node);
         } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
+            this.propertiesUp.get(property).clear(node);
+            this.propertiesDown.get(property).clear(node);
         } else {
             this.propertiesNone.get(property).put(space().toId(node), null);
-        }
-    }
-
-    
-    /**
-     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be cleared for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    private void removeProperty(long identifier, PredictiveProperty property) {
-
-        this.setModified();
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else {
-            this.propertiesNone.get(property).put(identifier, null);
         }
     }
 
