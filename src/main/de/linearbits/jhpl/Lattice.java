@@ -73,8 +73,12 @@ public class Lattice<T, U> {
     private final JHPLUnsafe                                unsafe;
     /** Number of nodes */
     private final long                                      numNodes;
-    /** Tack modifications */
+    /** Track modifications */
     private boolean                                         modified = false;
+    /** Data */
+    private final int[]                                     heights;
+    /** Data */
+    private final long[]                                    multiplier;
 
     /**
      * Constructs a new lattice
@@ -123,6 +127,8 @@ public class Lattice<T, U> {
         this.propertiesNone = new HashMap<PredictiveProperty, JHPLMap<Boolean>>();
         this.master = new JHPLTrieEQ(this);
         this.unsafe = new JHPLUnsafe(this);
+        this.heights = nodes.getHeights();
+        this.multiplier = nodes.getMultiplier();
     }
         
     /**
@@ -256,6 +262,22 @@ public class Lattice<T, U> {
         return hasProperty(node, nodes.getLevel(node), property);
     }
     
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    public LongIterator listAllNodesAsIdentifiersImpl(final int level) {
+        if (level < this.numLevels() / 2) {
+            JHPLLongList result = new JHPLLongList();
+            listAllNodesAsIdentifiersImplBottomUp(result, 0L, 0, level, 0);
+            return result.iterator();
+        } else {
+            JHPLLongList result = new JHPLLongList();
+            listAllNodesAsIdentifiersImplTopDown(result, this.numNodes-1, nodes.getLevel(this.numNodes-1), level, 0);
+            return result.iterator();
+        }
+    }
+
     /** 
      * Enumerates all nodes stored in the lattice
      * @return
@@ -263,7 +285,7 @@ public class Lattice<T, U> {
     public Iterator<int[]> listNodes() {
         return new WrappedIntArrayIterator(this, this.master.iterator());
     }
-
+    
     /**
      * Enumerates all nodes stored on the given level
      * @param level
@@ -272,7 +294,7 @@ public class Lattice<T, U> {
     public Iterator<int[]> listNodes(int level) {
         return new WrappedIntArrayIterator(this, this.master.iterator(level));
     }
-    
+
     /** 
      * Enumerates all nodes stored in the lattice
      * @return
@@ -296,7 +318,7 @@ public class Lattice<T, U> {
     public int numDimensions() {
         return this.nodes.getDimensions();
     }
-
+    
     /**
      * Returns the number of levels in this lattice
      * @return
@@ -304,7 +326,7 @@ public class Lattice<T, U> {
     public int numLevels() {
         return master.getLevels();
     }
-    
+
     /**
      * Returns the number of nodes in this lattice
      * @return
@@ -312,7 +334,7 @@ public class Lattice<T, U> {
     public long numNodes(){
         return numNodes;
     }
-
+    
     /**
      * Associates the given node with the given data.
      *  
@@ -327,6 +349,7 @@ public class Lattice<T, U> {
         // Store in master trie
         this.master.put(node);
     }
+
     
     /**
      * Stores the given property for the given node. If the property is predictive in an upwards direction, it 
@@ -397,7 +420,6 @@ public class Lattice<T, U> {
             throw new IllegalArgumentException("Property with unknown direction");
         }
     }
-
     
     /**
      * Stores the given property for the given node. If the property is predictive in an upwards direction, it 
@@ -410,7 +432,7 @@ public class Lattice<T, U> {
     public void putProperty(int[] node, PredictiveProperty property) {
         putProperty(node, nodes.getLevel(node), property);
     }
-    
+
     /**
      * Returns a class for mapping between spaces
      * @return
@@ -418,7 +440,7 @@ public class Lattice<T, U> {
     public JHPLSpace<T> space() {
         return space;
     }
-
+    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -440,7 +462,7 @@ public class Lattice<T, U> {
         builder.append("└── Memory: ").append(getByteSize()).append(" [bytes]\n");
         return builder.toString();
     }
-    
+
     /**
      * Allows for accessing methods that may not safe to be used on very large lattices
      * @return
@@ -448,80 +470,7 @@ public class Lattice<T, U> {
     public JHPLUnsafe unsafe() {
         return this.unsafe;
     }
-    
-    /**
-     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice. Note: hasNext() is
-     * not implemented. Simply iterate until <code>null</code> is returned.
-     * @return
-     */
-    private LongIterator listAllNodesAsIdentifiersImpl(final int level, final long[] multiplier) {
 
-        // Initialize
-        final int[] heights = this.nodes.getHeights();
-        final int dimensions = this.nodes.getDimensions();
-        final int[] element = new int[dimensions];
-        final LongStack identifiers = new LongStack(dimensions);
-        final IntegerStack offsets = new IntegerStack(dimensions);
-        final int[] mins = new int[dimensions];
-        
-        // Determine minimal indices
-        // TODO: These may be determined on-demand with more accuracy
-        for (int i = 0; i < mins.length; i++) {
-            int diff = numLevels() - heights[i];
-            mins[i] = level - diff;
-            mins[i] = mins[i] < 0 ? 0 : mins[i];
-        }
-        offsets.push(0);
-        identifiers.push(0L);
-        element[0] = 0;
-        
-        // Return
-        return new LongIterator() {
-
-            /** Current level*/
-            int current = 0;
-            
-            @Override public boolean hasNext() { throw new UnsupportedOperationException(); }
-
-            @Override
-            public long next() {
-                
-                // Iterate
-                while (true) {
-                    
-                    // End of node
-                    while (offsets.peek() == heights[offsets.size() - 1] || current > level) {
-                        int idx = offsets.size() - 1;
-                        current -= element[idx];
-                        element[idx] = 0;
-                        offsets.pop();
-                        identifiers.pop();
-                        if (offsets.empty()) {
-                            return -1;
-                        }
-                    }
-                    
-                    // Check and increment
-                    offsets.inc();
-                    
-                    // Store
-                    int val = offsets.peek() - 1;
-                    int idx = offsets.size() - 1;
-                    current = current - element[idx] + val;
-                    element[idx] = val;
-                    
-                    // Branch
-                    if (offsets.size() < dimensions) {
-                        identifiers.push(identifiers.peek() + (val * multiplier[idx]));
-                        offsets.push(mins[offsets.size()]); // Inner node
-                    } else if (current == level) {
-                        return identifiers.peek() + (val * multiplier[idx]); // Leaf node on required level
-                    }
-                }
-            }
-        };
-    }
-    
     /**
      * Enumerates all nodes regardless of whether or not they are stored in the lattice. Note: hasNext() is
      * not implemented. Simply iterate until <code>null</code> is returned.
@@ -573,6 +522,80 @@ public class Lattice<T, U> {
                 }
             }
         };
+    }
+
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    private void listAllNodesAsIdentifiersImplBottomUp(JHPLLongList result,
+                                                       long currentId,
+                                                       int currentLevel,
+                                                       int targetLevel,
+                                                       int currentDimension) {
+        
+        currentLevel--;
+        currentId-=multiplier[currentDimension];
+        for (int i = 0; i < heights[currentDimension]; i++) {
+
+            currentLevel++;
+            
+            if (currentLevel > targetLevel) {
+                return;
+            }
+            
+            currentId +=multiplier[currentDimension];
+            
+            if (currentDimension == heights.length - 1) {
+                if (currentLevel == targetLevel) {
+                    result.add(currentId);
+                }
+            } else {
+            
+                listAllNodesAsIdentifiersImplBottomUp(result,
+                                                      currentId,
+                                                      currentLevel,
+                                                      targetLevel,
+                                                      currentDimension + 1);
+            }
+        }
+    }
+
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    private void listAllNodesAsIdentifiersImplTopDown(JHPLLongList result,
+                                                      long currentId,
+                                                      int currentLevel,
+                                                      int targetLevel,
+                                                      int currentDimension) {
+
+        currentLevel++;
+        currentId+=multiplier[currentDimension];
+        for (int i = 0; i < heights[currentDimension]; i++) {
+            
+            currentLevel--;
+                        
+            if (currentLevel < targetLevel) {
+                return;
+            }
+            
+            currentId -= multiplier[currentDimension];
+            
+            if (currentDimension == heights.length - 1) {
+                if (currentLevel == targetLevel) {
+                    result.add(currentId);
+                }
+            } else {
+
+                listAllNodesAsIdentifiersImplTopDown(result,
+                                                     currentId,
+                                                     currentLevel,
+                                                     targetLevel,
+                                                     currentDimension + 1);
+            }
+        }
     }
 
     /**
@@ -787,7 +810,7 @@ public class Lattice<T, U> {
      * @return
      */
     LongIterator listAllNodesAsIdentifiers(int level) {
-        return new WrappedPrimitiveLongIterator(null, this.listAllNodesAsIdentifiersImpl(level, nodes.getMultiplier()));
+        return this.listAllNodesAsIdentifiersImpl(level);
     }
 
     /**
