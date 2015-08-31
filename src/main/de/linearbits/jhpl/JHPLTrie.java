@@ -464,25 +464,14 @@ abstract class JHPLTrie {
      * @param element
      */
     void put(int[] element) {
-        put(element, bound, 0, 0);
+        put(element, bound);
     }
     
     /**
      * Puts an element into this trie
      * @param element
      */
-    void put(int[] element, int level) {
-        put(element, level, 0, 0);
-    }
-
-    /**
-     * Helper for putting an element into this trie
-     * @param element
-     * @param level
-     * @param dimension
-     * @param offset
-     */
-    abstract void put(int[] element, int level, int dimension, int offset);
+    abstract void put(int[] element, int level);
 
     /**
      * To string method

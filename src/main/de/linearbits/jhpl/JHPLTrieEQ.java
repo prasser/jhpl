@@ -88,21 +88,20 @@ class JHPLTrieEQ extends JHPLTrie{
     }
 
     @Override
-    void put(int[] element, int level, int dimension, int offset) {
-       
-        offset += element[dimension];
+    void put(int[] element, int level) {
         
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1]);
-            used += heights[dimension + 1];
-            buffer.memory[offset] = pointer;
+        int offset = 0;
+        for (int dimension = 0; dimension < dimensions - 1; dimension++) {
+            offset += element[dimension];
+            if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
+                int space = heights[dimension + 1];
+                int pointer = buffer.allocate(space);
+                used += space;
+                buffer.memory[offset] = pointer;
+            }    
+            offset = buffer.memory[offset];
         }
-        
-        put(element, level, dimension + 1, buffer.memory[offset]);
+        offset += element[dimensions - 1];
+        buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
     }
 }

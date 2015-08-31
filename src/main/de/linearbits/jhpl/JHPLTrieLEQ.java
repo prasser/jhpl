@@ -131,24 +131,25 @@ class JHPLTrieLEQ extends JHPLTrie {
     }
 
     @Override
-    void put(int[] element, int level, int dimension, int offset) {
-       
-        int base = offset;
-        offset += element[dimension] + 1;
+    void put(int[] element, int level) {
         
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            // TODO: On the last page, we always leave the min-level at its initial value
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1] + 1);
-            used += heights[dimension + 1] + 1;
-            buffer.memory[offset] = pointer;
-            buffer.memory[pointer] = bound - 1;
-        } 
-        buffer.memory[base] = Math.min(level, buffer.memory[base]);
-        put(element, level, dimension + 1, buffer.memory[offset]);
+        int base = 0;
+        int offset = 0;
+        for (int dimension = 0; dimension < dimensions - 1; dimension++) {
+            base = offset;
+            offset += element[dimension] + 1;
+            if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
+                int space = heights[dimension + 1] + 1;
+                int pointer = buffer.allocate(space);
+                used += space;
+                buffer.memory[offset] = pointer;
+                buffer.memory[pointer] = bound - 1;
+            }    
+            buffer.memory[base] = Math.min(level, buffer.memory[base]);
+            offset = buffer.memory[offset];
+        }
+        // TODO: On the last page, we always leave the max-level at its initial value
+        offset += element[dimensions - 1] + 1;
+        buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
     }
 }
