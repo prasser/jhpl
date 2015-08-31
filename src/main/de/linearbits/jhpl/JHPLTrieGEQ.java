@@ -23,14 +23,70 @@ class JHPLTrieGEQ extends JHPLTrie{
      * @param lattice
      */
     JHPLTrieGEQ(Lattice<?, ?> lattice) {
-        super(lattice, false);
+        super(lattice, true, Integer.MIN_VALUE);
+    }
+
+    /**
+     * Queries this trie for the given element
+     * 
+     * @param element
+     * @param dimension
+     * @param offset
+     */
+    private boolean containsEQ(int[] element) {
+        
+        // Init
+        int offset = 0;
+        
+        // Foreach
+        for (int dimension = 0; dimension < element.length; dimension++) {
+    
+            // Increment
+            offset += element[dimension] + 1;
+    
+            // Find
+            int pointer = buffer.memory[offset];
+    
+            // Terminate
+            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
+                return false;
+                
+            // Next
+            } else {
+                offset = pointer;
+            }
+        }
+        
+        // Terminate
+        return true;
+    }
+    
+    boolean _contains(int[] element, int level, int dimension, int offset) {
+        
+        if (dimension == dimensions) {
+            return true;
+        } else {
+
+            // Check level
+           if (dimension < dimensions - 1 && buffer.memory[offset] <= level) {
+               return false;
+           }
+           
+            for (int i = element[dimension] + 1; i <= heights[dimension]; i++) {
+                int pointer = buffer.memory[offset + i];
+                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && _contains(element, level, dimension + 1, pointer)) { 
+                    return true; 
+                }
+            }
+        }
+        return false;
     }
 
     @Override
     boolean clear(int[] element, int dimension, int offset) {
 
         // Init
-        int elementOffset = offset + element[dimension];
+        int elementOffset = offset + element[dimension] + 1;
 
         // Terminate
         if (dimension == dimensions - 1) {
@@ -45,56 +101,55 @@ class JHPLTrieGEQ extends JHPLTrie{
                 if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
                     if (!clear(element, dimension + 1, pointer)) {
                         buffer.memory[elementOffset - i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                        used -= heights[dimension + 1];
+                        used -= heights[dimension + 1] + 1;
                     }
                 }
             }
         }
 
         // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
+        for (int i = offset + 1; i < offset + heights[dimension] + 1; i++) {
             if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
         }
         return false;
     }
 
     @Override
-    boolean contains(int[] element, int dimension, int offset) {
-
-        if (dimension == dimensions) {
+    boolean contains(int[] element, int level, int dimension, int offset) {
+        
+        // We need to check this, to allow for pruning with max(level)>=level instead of max(level)>level only.
+        if (level != bound && containsEQ(element)) {
             return true;
-        } else {
-            for (int i = element[dimension]; i < heights[dimension]; i++) {
-                int pointer = buffer.memory[offset + i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && contains(element, dimension + 1, pointer)) { 
-                    return true; 
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    void put(int[] element, int dimension, int offset) {
-       
-        offset += element[dimension];
-        
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1]);
-            used += heights[dimension + 1];
-            buffer.memory[offset] = pointer;
         }
         
-        put(element, dimension + 1, buffer.memory[offset]);
+        // Now, check
+        return _contains(element, level, dimension, offset);
     }
 
     @Override
     JHPLTrie newInstance() {
         return new JHPLTrieGEQ(this.lattice);
+    }
+
+    @Override
+    void put(int[] element, int level, int dimension, int offset) {
+
+        int base = offset;
+        offset += element[dimension] + 1;
+        
+        if (dimension == dimensions - 1) {
+            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
+            // TODO: On the last page, we always leave the max-level at its initial value
+            return;
+        } 
+        
+        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
+            int pointer = buffer.allocate(heights[dimension + 1] + 1);
+            used += heights[dimension + 1] + 1;
+            buffer.memory[offset] = pointer;
+            buffer.memory[pointer] = bound + 1;
+        }
+        buffer.memory[base] = Math.max(level, buffer.memory[base]);
+        put(element, level, dimension + 1, buffer.memory[offset]);
     }
 }

@@ -23,16 +23,10 @@ class JHPLTrieEQ extends JHPLTrie{
      * @param lattice
      */
     JHPLTrieEQ(Lattice<?, ?> lattice) {
-        super(lattice, false);
+        super(lattice, false, 0);
     }
 
-    /**
-     * Clears all elements from this trie for the given element
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
+    @Override
     boolean clear(int[] element, int dimension, int offset) {
 
         // Init
@@ -59,14 +53,8 @@ class JHPLTrieEQ extends JHPLTrie{
         return false;
     }
 
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    boolean contains(int[] element, int dimension, int offset) {
+    @Override
+    boolean contains(int[] element, int level, int dimension, int offset) {
         
         // Init
         offset = 0;
@@ -93,14 +81,14 @@ class JHPLTrieEQ extends JHPLTrie{
         // Terminate
         return true;
     }
-    
-    /**
-     * Helper for putting an element into this trie
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    void put(int[] element, int dimension, int offset) {
+
+    @Override
+    JHPLTrie newInstance() {
+        return new JHPLTrieEQ(this.lattice);
+    }
+
+    @Override
+    void put(int[] element, int level, int dimension, int offset) {
        
         offset += element[dimension];
         
@@ -115,11 +103,6 @@ class JHPLTrieEQ extends JHPLTrie{
             buffer.memory[offset] = pointer;
         }
         
-        put(element, dimension + 1, buffer.memory[offset]);
-    }
-
-    @Override
-    JHPLTrie newInstance() {
-        return new JHPLTrieEQ(this.lattice);
+        put(element, level, dimension + 1, buffer.memory[offset]);
     }
 }

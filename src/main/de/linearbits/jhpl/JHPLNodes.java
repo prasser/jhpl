@@ -145,8 +145,6 @@ public class JHPLNodes<T> {
      * @return
      */
     public boolean isDirectParentChild(int[] parent, int[] child) {
-        checkNode(parent);
-        checkNode(child);
         int diff = 0;
         for (int i=0; i<parent.length; i++) {
             if (parent[i] < child[i]) {
@@ -165,8 +163,6 @@ public class JHPLNodes<T> {
      * @return
      */
     public boolean isParentChild(int[] parent, int[] child) {
-        checkNode(parent);
-        checkNode(child);
         int diff = 0;
         for (int i=0; i<parent.length; i++) {
             if (parent[i] < child[i]) {
@@ -185,8 +181,6 @@ public class JHPLNodes<T> {
      * @return
      */
     public boolean isSame(int[] node1, int[] node2) {
-        checkNode(node1);
-        checkNode(node2);
         return Arrays.equals(node1, node2);
     }
 
@@ -330,9 +324,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithoutProperty(final int[] node) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array);
+                return !lattice.hasProperty(array, level);
             }
         });
     }
@@ -343,9 +338,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithoutProperty(final int[] node, final PredictiveProperty property) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array, property);
+                return !lattice.hasProperty(array, level, property);
             }
         });
     }
@@ -355,9 +351,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithoutPropertyAndNotStored(final int[] node) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array) && !lattice.contains(array);
+                return !lattice.hasProperty(array, level) && !lattice.contains(array);
             }
         });
     }
@@ -367,9 +364,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithProperty(final int[] node) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array);
+                return lattice.hasProperty(array, level);
             }
         });
     }
@@ -380,9 +378,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithProperty(final int[] node, final PredictiveProperty property) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array, property);
+                return lattice.hasProperty(array, level, property);
             }
         });
     }
@@ -392,9 +391,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listPredecessorsWithPropertyOrStored(final int[] node) {
+        final int level = this.getLevel(node) - 1;
         return new ConditionalIntArrayIterator(listPredecessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array) || lattice.contains(array);
+                return lattice.hasProperty(array, level) || lattice.contains(array);
             }
         });
     }
@@ -542,9 +542,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithoutProperty(final int[] node) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array);
+                return !lattice.hasProperty(array, level);
             }
         });
     }
@@ -555,9 +556,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithoutProperty(final int[] node, final PredictiveProperty property) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array, property);
+                return !lattice.hasProperty(array, level, property);
             }
         });
     }
@@ -567,9 +569,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithoutPropertyAndNotStored(final int[] node) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array) && !lattice.contains(array);
+                return !lattice.hasProperty(array, level) && !lattice.contains(array);
             }
         });
     }   
@@ -580,9 +583,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithProperty(final int[] node) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array);
+                return lattice.hasProperty(array, level);
             }
         });
     }
@@ -594,9 +598,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithProperty(final int[] node, final PredictiveProperty property) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array, property);
+                return lattice.hasProperty(array, level, property);
             }
         });
     }
@@ -607,9 +612,10 @@ public class JHPLNodes<T> {
      * @return
      */
     public Iterator<int[]> listSuccessorsWithPropertyOrStored(final int[] node) {
+        final int level = this.getLevel(node) + 1;
         return new ConditionalIntArrayIterator(listSuccessors(node), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array) || lattice.contains(array);
+                return lattice.hasProperty(array, level) || lattice.contains(array);
             }
         });
     }
@@ -622,8 +628,6 @@ public class JHPLNodes<T> {
      */
     private Iterator<int[]> listPredecessors(final int[] result, final int[] node) {
 
-        checkNode(node);
-        checkArray(result);
         lattice.setUnmodified();
         
         if (Arrays.equals(node, bottom)) { 
@@ -700,8 +704,6 @@ public class JHPLNodes<T> {
      */
     private Iterator<int[]> listSuccessors(final int[] result, final int[] node) {
 
-        checkArray(result);
-        checkNode(node);
         lattice.setUnmodified();
         
         if (Arrays.equals(node, top)) { 
@@ -767,56 +769,6 @@ public class JHPLNodes<T> {
                 throw new UnsupportedOperationException();
             }
         };
-    }
-
-    /**
-     * Checks the given array for boundary conditions
-     * @param array
-     */
-    void checkArray(int[] array) {
-        if (array == null) { throw new NullPointerException("Array must not be null"); }
-        if (array.length != dimensions) { throw new IllegalArgumentException("Array must have " + dimensions + " slots"); }
-    }
-
-    /**
-     * Checks the given array for boundary conditions
-     * @param array
-     */
-    void checkArray(T[] array) {
-        if (array == null) { throw new NullPointerException("Array must not be null"); }
-        if (array.length != dimensions) { throw new IllegalArgumentException("Array must have " + dimensions + " slots"); }
-    }
-
-    /**
-     * Checks a node for boundary conditions
-     * @param node
-     */
-    void checkNode(int[] node) {
-        if (node == null) {
-            throw new NullPointerException("Node must not be null");
-        }
-        if (node.length != dimensions) {
-            throw new IllegalArgumentException("Node must have " + dimensions + " dimensions");
-        }
-        for (int i = 0; i < dimensions; i++) {
-            if (node[i] < 0 || node[i] >= heights[i]) {
-                throw new IllegalArgumentException("Dimension out of bounds");
-            }
-        }
-    }
-    
-    /**
-     * Checks the given array for boundary conditions
-     * @param array
-     */
-    void checkNode(T[] array) {
-        if (array == null) { throw new NullPointerException("Array must not be null"); }
-        if (array.length != dimensions) { throw new IllegalArgumentException("Array must have " + dimensions + " slots"); }
-        for (T t : array) {
-            if (t == null) {
-                throw new NullPointerException("Elements must not contain null");
-            }
-        }
     }
 
     /**

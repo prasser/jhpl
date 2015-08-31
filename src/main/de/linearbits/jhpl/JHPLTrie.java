@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.linearbits.jhpl.JHPLIterator.LongIterator;
+import de.linearbits.jhpl.JHPLIterator.TrieIterator;
 import de.linearbits.jhpl.JHPLStack.IntegerStack;
 import de.linearbits.jhpl.JHPLStack.LongStack;
 
@@ -27,7 +28,7 @@ import de.linearbits.jhpl.JHPLStack.LongStack;
  */
 abstract class JHPLTrie {
 
-    /** Constant*/
+    /** Constant */
     protected static final double COMPACTION_THRESHOLD = 0.2d;
 
     /** The buffer */
@@ -42,21 +43,30 @@ abstract class JHPLTrie {
     protected final int           levels;
     /** The number of used memory units */
     protected int                 used;
+    /** Are we including level counters */
+    protected boolean             pruning;
+    /** Default bound for pruning */
+    protected final int           bound;
 
     /**
      * Constructs a new trie
      * @param lattice
-     * @param withLevel
+     * @param pruning
      */
-    JHPLTrie(Lattice<?, ?> lattice, boolean withLevel) {
+    JHPLTrie(Lattice<?, ?> lattice, boolean pruning, int bound) {
         
         // Initialize. Root node will be at offset 0
         this.dimensions = lattice.nodes().getDimensions();
         this.heights = lattice.nodes().getHeights();
         this.buffer = new JHPLBuffer();
-        this.buffer.allocate(heights[0] + (withLevel ? 1 : 0));
-        this.used = heights[0] + (withLevel ? 1 : 0);
+        this.buffer.allocate(heights[0] + (pruning ? 1 : 0));
+        this.bound = bound;
+        if (pruning) {
+            this.buffer.memory[0] = (bound == Integer.MAX_VALUE) ? Integer.MAX_VALUE - 1 : Integer.MIN_VALUE + 1;
+        }
+        this.used = heights[0] + (pruning ? 1 : 0);
         this.lattice = lattice;
+        this.pruning = pruning;
         int sum = 0;
         for (int i = 0; i < this.heights.length; i++) {
             sum += this.heights[i] - 1;
@@ -64,40 +74,71 @@ abstract class JHPLTrie {
         this.levels = sum + 1;
     }
     
-    abstract boolean clear(int[] element, int dimension, int offset);
-
-    abstract JHPLTrie newInstance();
-    
     /**
-     * Compaction method on the trie
+     * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
+     * <code>null</code> is returned.
+     * @return
      */
-    void compactify() {
-        Iterator<int[]> iterator = this.iterator();
-        JHPLTrie other = newInstance();
-        int[] element = iterator.next();
-        while (element != null) {
-            other.put(element);
-            element = iterator.next();
-        }
-        this.buffer.replace(other.buffer);
-    }
-
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    abstract boolean contains(int[] element, int dimension, int offset);
+    private TrieIterator _iterator() {
         
-    /**
-     * Helper for putting an element into this trie
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    abstract void put(int[] element, int dimension, int offset);
+        // Initialize
+        final int[] element = new int[this.dimensions];
+        final IntegerStack offsets = new IntegerStack(this.dimensions);
+        final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
+        offsets.push(0);
+        pointers.push(0);
+        element[0] = 0;
+        
+        // Return
+        return new TrieIterator() {
+            
+            int level = 0;
+                
+            @Override
+            public int level() {
+                return level;
+            }
+            
+            @Override
+            public int[] next() {
+                
+                // Iteratively traverse the trie
+                while (true) {
+                    
+                    // End of node
+                    while (offsets.peek() == heights[offsets.size() - 1]) {
+                        offsets.pop();
+                        pointers.pop();
+                        if (offsets.empty()) {
+                            return null;
+                        }
+                    }
+                    
+                    // Check and increment
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
+                    offsets.inc();
+                
+                    // If available
+                    if (mem != JHPLBuffer.FLAG_NOT_AVAILABLE) {
+            
+                        int dimension = offsets.size() - 1;
+                        level -= element[dimension];
+                        element[dimension] = offsets.peek() - 1;
+                        level += element[dimension];
+                        if (offsets.size() < dimensions) {
+                            // Inner node
+                            offsets.push(0);
+                            pointers.push(mem);
+                        } else {
+                            // Leaf node
+                            return element;
+                        }
+                    }
+                }
+            }
+        };
+    }
 
     /**
      * Helper for converting the trie to a string
@@ -111,27 +152,28 @@ abstract class JHPLTrie {
         StringBuilder builder = new StringBuilder();
         List<Integer> children = new ArrayList<Integer>();
         for (int i = offset; i<offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) {
+            if (buffer.memory[i + (pruning ? 1 : 0)] != JHPLBuffer.FLAG_NOT_AVAILABLE) {
                 children.add(i);
             }
         }
+        int level = buffer.memory[offset];
         for (int j = 0; j < children.size() - 1; j++) {
             int i = children.get(j);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append("]\n");
+            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         if (children.size() > 0) {
             int i = children.get(children.size() - 1);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append("]\n");
+            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), true, buffer.memory[i], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "│   "), true, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         return builder;
     }
-
+    
     /**
      * Clears all above/below this element
      * @param element
@@ -146,15 +188,55 @@ abstract class JHPLTrie {
         }
     }
 
+    abstract boolean clear(int[] element, int dimension, int offset);
+        
+    /**
+     * Compaction method on the trie
+     */
+    void compactify() {
+        
+        TrieIterator iterator = this._iterator();
+        JHPLTrie other = newInstance();
+        int[] element = iterator.next();
+        int level = iterator.level();
+        while (element != null) {
+            other.put(element, level);
+            element = iterator.next();
+            level = iterator.level();
+        }
+        this.buffer.replace(other.buffer);
+    }
     /**
      * Queries this trie for the given element
      * @param node
      * @return
      */
     boolean contains(int[] node) {
-        return contains(node, 0, 0);
+        return contains(node, bound, 0, 0);
     }
     
+//    abstract void check(int[] element, int offset, int dimension);
+
+    /**
+     * Queries this trie for the given element
+     * @param node
+     * @param level
+     * @return
+     */
+    boolean contains(int[] node, int level) {
+        return contains(node, level, 0, 0);
+    }
+
+    /**
+     * Queries this trie for the given element
+     * 
+     * @param element
+     * @param level
+     * @param dimension
+     * @param offset
+     */
+    abstract boolean contains(int[] element, int level, int dimension, int offset);
+
     /**
      * Returns the memory consumption in bytes
      * @return
@@ -171,7 +253,6 @@ abstract class JHPLTrie {
         return this.levels;
     }
 
-
     /**
      * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
      * <code>null</code> is returned.
@@ -183,6 +264,7 @@ abstract class JHPLTrie {
         final int[] element = new int[this.dimensions];
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         element[0] = 0;
@@ -208,7 +290,7 @@ abstract class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                 
                     // If available
@@ -229,7 +311,7 @@ abstract class JHPLTrie {
             @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
-
+    
     /**
      * Returns an iterator over all elements on the given level stored in the trie. 
      * Note: hasNext() is not implemented. Simply iterate until <code>null</code> is returned.
@@ -243,6 +325,7 @@ abstract class JHPLTrie {
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
         final int[] mins = new int[this.dimensions];
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         element[0] = 0;
@@ -282,7 +365,7 @@ abstract class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                     
                     // Available
@@ -310,7 +393,8 @@ abstract class JHPLTrie {
             @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
-    
+
+
     /**
      * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
      * <code>null</code> is returned.
@@ -322,6 +406,7 @@ abstract class JHPLTrie {
         final LongStack identifiers = new LongStack(this.dimensions);
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         identifiers.push(0L);
@@ -349,7 +434,7 @@ abstract class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                 
                     // If available
@@ -372,13 +457,32 @@ abstract class JHPLTrie {
         };
     }
 
+    abstract JHPLTrie newInstance();
+    
     /**
      * Puts an element into this trie
      * @param element
      */
     void put(int[] element) {
-        put(element, 0, 0);
+        put(element, bound, 0, 0);
     }
+    
+    /**
+     * Puts an element into this trie
+     * @param element
+     */
+    void put(int[] element, int level) {
+        put(element, level, 0, 0);
+    }
+
+    /**
+     * Helper for putting an element into this trie
+     * @param element
+     * @param level
+     * @param dimension
+     * @param offset
+     */
+    abstract void put(int[] element, int level, int dimension, int offset);
 
     /**
      * To string method

@@ -142,9 +142,6 @@ public class JHPLSpace<T> {
     /** The offsets for each dimension */
     private final long[]            multiplier;
 
-    /** The nodes */
-    private final JHPLNodes<T>      nodes;
-
     /** The number of nodes */
     private final long              numNodes;
 
@@ -156,7 +153,6 @@ public class JHPLSpace<T> {
     @SafeVarargs
     @SuppressWarnings("unchecked")
     JHPLSpace(JHPLNodes<T> nodes, T[]... elements){
-        this.nodes = nodes;
         this.elements = elements;
         this.dimensions = elements.length;
         this.multiplier = new long[this.dimensions];
@@ -273,7 +269,6 @@ public class JHPLSpace<T> {
      */
     public int[] toIndex(int[] result, long id) {
         checkId(id);
-        nodes.checkArray(result);
         for (int i = 0; i < dimensions; i++) {
             result[i] = (int)(id / multiplier[i]);
             id %= multiplier[i];
@@ -288,8 +283,6 @@ public class JHPLSpace<T> {
      * @return
      */
     public int[] toIndex(int[] result, T[] node) {
-        nodes.checkArray(result);
-        nodes.checkNode(node);
         for (int i = 0; i < dimensions; i++) {
             result[i] = indices[i].get(node[i]);
         }
@@ -328,7 +321,6 @@ public class JHPLSpace<T> {
      */
     @SuppressWarnings("unchecked")
     public T[] toSource(int[] node) {
-        nodes.checkNode(node);
         return toSource((T[]) Array.newInstance(this.elements[0][0].getClass(), node.length), node);
     }
 
@@ -352,8 +344,6 @@ public class JHPLSpace<T> {
      * @return
      */
     public T[] toSource(T[] result, int[] node) {
-        nodes.checkArray(result);
-        nodes.checkNode(node);
         for (int i = 0; i < dimensions; i++) {
             result[i] = this.elements[i][node[i]];
         }
@@ -368,7 +358,6 @@ public class JHPLSpace<T> {
      */
     public T[] toSource(T[] result, long id) {
         checkId(id);
-        nodes.checkArray(result);
         for (int i = 0; i < dimensions; i++) {
             int idx = (int)(id / multiplier[i]);
             if (idx < 0 || idx >= this.elements[i].length) {
