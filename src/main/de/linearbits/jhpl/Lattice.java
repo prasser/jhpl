@@ -22,8 +22,6 @@ import de.linearbits.jhpl.JHPLIterator.WrappedIntArrayIterator;
 import de.linearbits.jhpl.JHPLIterator.WrappedPrimitiveLongIterator;
 import de.linearbits.jhpl.JHPLStack.IntegerStack;
 import de.linearbits.jhpl.JHPLStack.LongStack;
-import de.linearbits.jhpl.JHPLTrie.ElementComparator;
-import de.linearbits.jhpl.PredictiveProperty.Direction;
 
 /**
  * This class implements a storage structure for information about elements in very large lattices. To avoid 
@@ -75,8 +73,12 @@ public class Lattice<T, U> {
     private final JHPLUnsafe                                unsafe;
     /** Number of nodes */
     private final long                                      numNodes;
-    /** Tack modifications */
+    /** Track modifications */
     private boolean                                         modified = false;
+    /** Data */
+    private final int[]                                     heights;
+    /** Data */
+    private final long[]                                    multiplier;
 
     /**
      * Constructs a new lattice
@@ -123,13 +125,15 @@ public class Lattice<T, U> {
         this.propertiesUp = new HashMap<PredictiveProperty, JHPLTrie>();
         this.propertiesDown = new HashMap<PredictiveProperty, JHPLTrie>();
         this.propertiesNone = new HashMap<PredictiveProperty, JHPLMap<Boolean>>();
-        this.master = new JHPLTrie(this);
+        this.master = new JHPLTrieEQ(this);
         this.unsafe = new JHPLUnsafe(this);
+        this.heights = nodes.getHeights();
+        this.multiplier = nodes.getMultiplier();
     }
         
     /**
      * Returns whether this lattice stores any information about the given node.
-     * This is a guaranteed O(1) operation.
+     * 
      * @param node
      * @return
      */
@@ -139,6 +143,7 @@ public class Lattice<T, U> {
     
     /**
      * Returns a pretty accurate estimation of the memory consumed by this lattice
+     * 
      * @return
      */
     public long getByteSize() {
@@ -158,92 +163,121 @@ public class Lattice<T, U> {
     }
     
     /**
-     * Returns the data associated with the given node, <code>null</code> if there is none. <br>
-     * <br>
-     * This is a guaranteed O(1) operation for any node.
+     * Returns the data associated with the given node, <code>null</code> if there is none.
      * 
      * @param node
      * @return
      */
     public U getData(int[] node) {
-        this.nodes.checkNode(node);
         return this.data.get(node);
     }
     
+
     /**
-     * Returns whether the node has any property. This is a guaranteed O(1) operation.
+     * Returns whether the node has any property.
      * @param node
      * @return
      */
     public boolean hasProperty(int[] node) {
+        return hasProperty(node, nodes.getLevel(node));
+    }
+    
+    /**
+     * Returns whether the node has any property.
+     * @param node
+     * @param level
+     * @return
+     */
+    public boolean hasProperty(int[] node, int level) {
         
         for (PredictiveProperty property : this.propertiesUp.keySet()) {
-            if (this.propertiesUp.get(property).contains(node, ElementComparator.LEQ)){
+            if (this.propertiesUp.get(property).contains(node, level)){
                 return true;
             }
         }
         for (PredictiveProperty property : this.propertiesDown.keySet()) {
-            if (this.propertiesDown.get(property).contains(node, ElementComparator.GEQ)){
+            if (this.propertiesDown.get(property).contains(node, level)){
                 return true;
             }
         }
+        long id = space().toId(node);
         for (PredictiveProperty property : this.propertiesNone.keySet()) {
-            Boolean result = this.propertiesNone.get(property).get(space().toId(node));
+            Boolean result = this.propertiesNone.get(property).get(id);
             result = result == null ? false : result;
             return result;
         }
         return false;
     }
-    
+
     /**
-     * Returns whether the given node has the given property. <br>
-     * <br>
-     * This is a guaranteed O(1) operation for any node.
+     * Returns whether the given node has the given property.
+     * 
+     * @param node
+     * @param level
+     * @param property
+     * @return
+     */
+    public boolean hasProperty(int[] node, int level, PredictiveProperty property) {
+        
+        switch (property.getDirection()) {
+        case UP:
+            JHPLTrie trie = this.propertiesUp.get(property);
+            return trie == null ? false : trie.contains(node, level);
+        case DOWN:
+            trie = this.propertiesDown.get(property);
+            return trie == null ? false : trie.contains(node, level);
+        case BOTH:
+            trie = this.propertiesUp.get(property);
+            if (trie != null && trie.contains(node, level)) {
+                return true;
+            }
+            trie = this.propertiesDown.get(property);
+            if (trie != null && trie.contains(node, level)) {
+                return true;
+            } else {
+                return false;
+            }
+        case NONE:
+            
+            JHPLMap<Boolean> map = this.propertiesNone.get(property);
+            if (map == null) {
+                return false;
+            } else {
+                Boolean result = map.get(space.toId(node));
+                return result == null ? false : result;
+            }
+        default: 
+            throw new IllegalArgumentException("Property with unknown direction");
+        }
+    }
+        
+    /**
+     * Returns whether the given node has the given property.
+     * 
      * @param node
      * @param property
      * @return
      */
     public boolean hasProperty(int[] node, PredictiveProperty property) {
-        checkProperty(property);
-        this.nodes.checkNode(node);
-        if (property.getDirection() == Direction.UP) {
-            return this.propertiesUp.get(property).contains(node, ElementComparator.LEQ);
-        } else if (property.getDirection() == Direction.DOWN) {
-            return this.propertiesDown.get(property).contains(node, ElementComparator.GEQ);
-        } else if (property.getDirection() == Direction.BOTH) {
-            return (this.propertiesUp.get(property).contains(node, ElementComparator.LEQ) || 
-                    this.propertiesDown.get(property).contains(node, ElementComparator.GEQ));
+        return hasProperty(node, nodes.getLevel(node), property);
+    }
+    
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    public LongIterator listAllNodesAsIdentifiersImpl(final int level) {
+        if (level < this.numLevels() / 2) {
+            JHPLLongList result = new JHPLLongList();
+            listAllNodesAsIdentifiersImplBottomUp(result, 0L, 0, level, 0);
+            return result.iterator();
         } else {
-            Boolean result = this.propertiesNone.get(property).get(space().toId(node));
-            result = result == null ? false : result;
-            return result;
+            JHPLLongList result = new JHPLLongList();
+            listAllNodesAsIdentifiersImplTopDown(result, this.numNodes-1, nodes.getLevel(this.numNodes-1), level, 0);
+            return result.iterator();
         }
     }
 
-    /**
-     * Returns whether the given node has the given property. <br>
-     * <br>
-     * This is a guaranteed O(1) operation for any node.
-     * @param node
-     * @param property
-     * @return
-     */
-    public boolean hasProperty(long identifier, PredictiveProperty property) {
-        checkProperty(property);
-        if (property.getDirection() == Direction.UP) {
-            return this.propertiesUp.get(property).contains(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            return this.propertiesDown.get(property).contains(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            return (this.propertiesUp.get(property).contains(identifier, ElementComparator.LEQ, nodes.getMultiplier()) || 
-                    this.propertiesDown.get(property).contains(identifier, ElementComparator.GEQ, nodes.getMultiplier()));
-        } else {
-            Boolean result = this.propertiesNone.get(property).get(identifier);
-            result = result == null ? false : result;
-            return result;
-        }
-    }
-    
     /** 
      * Enumerates all nodes stored in the lattice
      * @return
@@ -251,7 +285,7 @@ public class Lattice<T, U> {
     public Iterator<int[]> listNodes() {
         return new WrappedIntArrayIterator(this, this.master.iterator());
     }
-
+    
     /**
      * Enumerates all nodes stored on the given level
      * @param level
@@ -260,7 +294,7 @@ public class Lattice<T, U> {
     public Iterator<int[]> listNodes(int level) {
         return new WrappedIntArrayIterator(this, this.master.iterator(level));
     }
-    
+
     /** 
      * Enumerates all nodes stored in the lattice
      * @return
@@ -284,7 +318,7 @@ public class Lattice<T, U> {
     public int numDimensions() {
         return this.nodes.getDimensions();
     }
-
+    
     /**
      * Returns the number of levels in this lattice
      * @return
@@ -292,7 +326,7 @@ public class Lattice<T, U> {
     public int numLevels() {
         return master.getLevels();
     }
-    
+
     /**
      * Returns the number of nodes in this lattice
      * @return
@@ -300,106 +334,105 @@ public class Lattice<T, U> {
     public long numNodes(){
         return numNodes;
     }
-
+    
     /**
-     * Associates the given node with the given data. <br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has already been called).
-     * Analogously to put operations on hash tables it is actually amortized O(1). 
+     * Associates the given node with the given data.
+     *  
      * @param node
      * @param data
      */
     public void putData(int[] node, U data) {
         
-        this.nodes.checkNode(node);
         this.setModified();
-        
         this.data.put(node, data);
 
         // Store in master trie
         this.master.put(node);
     }
+
     
     /**
      * Stores the given property for the given node. If the property is predictive in an upwards direction, it 
      * will also be stored for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be stored for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
+     * it will also be stored for all predecessors of the given node.
      * 
      * @param node
+     * @param level
      * @param property
      */
-    public void putProperty(int[] node, PredictiveProperty property) {
+    public void putProperty(int[] node, int level, PredictiveProperty property) {
 
-        this.nodes.checkNode(node);
-        this.checkProperty(property);
         this.setModified();
         
         // Store in master trie
         this.master.put(node);
         
         // Reduce the amount of information stored in the trie
-        if (hasProperty(node, property)) {
+        if (hasProperty(node, level, property)) {
             return;
         }
-
-        // Reduce the amount of information stored in the trie
-        removeProperty(node, property);
         
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).put(node);
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).put(node);
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).put(node); 
-            this.propertiesDown.get(property).put(node);
-        } else {
-            this.propertiesNone.get(property).put(space().toId(node), true); 
+        switch (property.getDirection()) {
+        case UP:
+            JHPLTrie trie = this.propertiesUp.get(property);
+            if (trie == null) {
+                trie = new JHPLTrieLEQ(this);
+                this.propertiesUp.put(property, trie);
+            }
+            trie.clear(node);
+            trie.put(node, level);
+            break;
+        case DOWN:
+            trie = this.propertiesDown.get(property);
+            if (trie == null) {
+                trie = new JHPLTrieGEQ(this);
+                this.propertiesDown.put(property, trie);
+            }
+            trie.clear(node);
+            trie.put(node, level);
+            break;
+        case BOTH:
+            trie = this.propertiesUp.get(property);
+            if (trie == null) {
+                trie = new JHPLTrieLEQ(this);
+                this.propertiesUp.put(property, trie);
+            }
+            trie.clear(node);
+            trie.put(node, level);
+            trie = this.propertiesDown.get(property);
+            if (trie == null) {
+                trie = new JHPLTrieGEQ(this);
+                this.propertiesDown.put(property, trie);
+            }
+            trie.clear(node);
+            trie.put(node, level);
+            break;
+        case NONE:
+            
+            JHPLMap<Boolean> map = this.propertiesNone.get(property);
+            if (map == null) {
+                map = new JHPLMap<Boolean>();
+                this.propertiesNone.put(property, map);
+            }
+            this.propertiesNone.get(property).put(space().toId(node), true);
+            break;
+        default:
+            throw new IllegalArgumentException("Property with unknown direction");
         }
     }
-
+    
     /**
      * Stores the given property for the given node. If the property is predictive in an upwards direction, it 
      * will also be stored for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be stored for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
+     * it will also be stored for all predecessors of the given node.
      * 
      * @param node
      * @param property
      */
-    public void putProperty(long identifier, PredictiveProperty property) {
-
-        this.setModified();
-        
-        // Store in master trie
-        this.master.put(identifier, nodes.getMultiplier());
-        
-        // Reduce the amount of information stored in the trie
-        if (hasProperty(identifier, property)) {
-            return;
-        }
-
-        // Reduce the amount of information stored in the trie
-        removeProperty(identifier, property);
-        
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).put(identifier, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).put(identifier, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).put(identifier, nodes.getMultiplier()); 
-            this.propertiesDown.get(property).put(identifier, nodes.getMultiplier());
-        } else {
-            this.propertiesNone.get(property).put(identifier, true); 
-        }
+    public void putProperty(int[] node, PredictiveProperty property) {
+        putProperty(node, nodes.getLevel(node), property);
     }
-    
+
     /**
      * Returns a class for mapping between spaces
      * @return
@@ -407,7 +440,7 @@ public class Lattice<T, U> {
     public JHPLSpace<T> space() {
         return space;
     }
-
+    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -429,7 +462,7 @@ public class Lattice<T, U> {
         builder.append("└── Memory: ").append(getByteSize()).append(" [bytes]\n");
         return builder.toString();
     }
-    
+
     /**
      * Allows for accessing methods that may not safe to be used on very large lattices
      * @return
@@ -437,113 +470,7 @@ public class Lattice<T, U> {
     public JHPLUnsafe unsafe() {
         return this.unsafe;
     }
-    
 
-    /**
-     * Internal method that checks properties for validity
-     * @param property
-     */
-    private void checkProperty(PredictiveProperty property) {
-        
-        if (property == null) {
-            throw new NullPointerException("Property must not be null");
-        }
-        
-        if (property.getDirection() == Direction.UP) {
-            if (!this.propertiesUp.containsKey(property)) {
-                this.propertiesUp.put(property, new JHPLTrie(this));
-            }
-        } else if (property.getDirection() == Direction.DOWN) {
-            if (!this.propertiesDown.containsKey(property)) {
-                this.propertiesDown.put(property, new JHPLTrie(this));
-            }
-        } else if (property.getDirection() == Direction.BOTH) {
-            if (!this.propertiesUp.containsKey(property)) {
-                this.propertiesUp.put(property, new JHPLTrie(this));
-            }
-            if (!this.propertiesDown.containsKey(property)) {
-                this.propertiesDown.put(property, new JHPLTrie(this));
-            }
-        } else {
-            if (!this.propertiesNone.containsKey(property)) {
-                this.propertiesNone.put(property, new JHPLMap<Boolean>());
-            }
-        }
-    }
-    
-    /**
-     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice. Note: hasNext() is
-     * not implemented. Simply iterate until <code>null</code> is returned.
-     * @return
-     */
-    private LongIterator listAllNodesAsIdentifiersImpl(final int level, final long[] multiplier) {
-
-        // Initialize
-        final int[] heights = this.nodes.getHeights();
-        final int dimensions = this.nodes.getDimensions();
-        final int[] element = new int[dimensions];
-        final LongStack identifiers = new LongStack(dimensions);
-        final IntegerStack offsets = new IntegerStack(dimensions);
-        final int[] mins = new int[dimensions];
-        
-        // Determine minimal indices
-        // TODO: These may be determined on-demand with more accuracy
-        for (int i = 0; i < mins.length; i++) {
-            int diff = numLevels() - heights[i];
-            mins[i] = level - diff;
-            mins[i] = mins[i] < 0 ? 0 : mins[i];
-        }
-        offsets.push(0);
-        identifiers.push(0L);
-        element[0] = 0;
-        
-        // Return
-        return new LongIterator() {
-
-            /** Current level*/
-            int current = 0;
-            
-            @Override public boolean hasNext() { throw new UnsupportedOperationException(); }
-
-            @Override
-            public long next() {
-                
-                // Iterate
-                while (true) {
-                    
-                    // End of node
-                    while (offsets.peek() == heights[offsets.size() - 1] || current > level) {
-                        int idx = offsets.size() - 1;
-                        current -= element[idx];
-                        element[idx] = 0;
-                        offsets.pop();
-                        identifiers.pop();
-                        if (offsets.empty()) {
-                            return -1;
-                        }
-                    }
-                    
-                    // Check and increment
-                    offsets.inc();
-                    
-                    // Store
-                    int val = offsets.peek() - 1;
-                    int idx = offsets.size() - 1;
-                    current = current - element[idx] + val;
-                    element[idx] = val;
-                    
-                    // Branch
-                    if (offsets.size() < dimensions) {
-                        identifiers.push(identifiers.peek() + (val * multiplier[idx]));
-                        offsets.push(mins[offsets.size()]); // Inner node
-                    } else if (current == level) {
-                        return identifiers.peek() + (val * multiplier[idx]); // Leaf node on required level
-                    }
-                }
-            }
-        };
-    }
-    
     /**
      * Enumerates all nodes regardless of whether or not they are stored in the lattice. Note: hasNext() is
      * not implemented. Simply iterate until <code>null</code> is returned.
@@ -595,6 +522,80 @@ public class Lattice<T, U> {
                 }
             }
         };
+    }
+
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    private void listAllNodesAsIdentifiersImplBottomUp(JHPLLongList result,
+                                                       long currentId,
+                                                       int currentLevel,
+                                                       int targetLevel,
+                                                       int currentDimension) {
+        
+        currentLevel--;
+        currentId-=multiplier[currentDimension];
+        for (int i = 0; i < heights[currentDimension]; i++) {
+
+            currentLevel++;
+            
+            if (currentLevel > targetLevel) {
+                return;
+            }
+            
+            currentId +=multiplier[currentDimension];
+            
+            if (currentDimension == heights.length - 1) {
+                if (currentLevel == targetLevel) {
+                    result.add(currentId);
+                }
+            } else {
+            
+                listAllNodesAsIdentifiersImplBottomUp(result,
+                                                      currentId,
+                                                      currentLevel,
+                                                      targetLevel,
+                                                      currentDimension + 1);
+            }
+        }
+    }
+
+    /**
+     * Enumerates all nodes on the given level regardless of whether or not they are stored in the lattice.
+     * @return
+     */
+    private void listAllNodesAsIdentifiersImplTopDown(JHPLLongList result,
+                                                      long currentId,
+                                                      int currentLevel,
+                                                      int targetLevel,
+                                                      int currentDimension) {
+
+        currentLevel++;
+        currentId+=multiplier[currentDimension];
+        for (int i = 0; i < heights[currentDimension]; i++) {
+            
+            currentLevel--;
+                        
+            if (currentLevel < targetLevel) {
+                return;
+            }
+            
+            currentId -= multiplier[currentDimension];
+            
+            if (currentDimension == heights.length - 1) {
+                if (currentLevel == targetLevel) {
+                    result.add(currentId);
+                }
+            } else {
+
+                listAllNodesAsIdentifiersImplTopDown(result,
+                                                     currentId,
+                                                     currentLevel,
+                                                     targetLevel,
+                                                     currentDimension + 1);
+            }
+        }
     }
 
     /**
@@ -739,61 +740,6 @@ public class Lattice<T, U> {
     }
 
     /**
-     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be cleared for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    private void removeProperty(int[] node, PredictiveProperty property) {
-
-        this.setModified();
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(node, ElementComparator.GEQ);
-            this.propertiesDown.get(property).clear(node, ElementComparator.LEQ);
-        } else {
-            this.propertiesNone.get(property).put(space().toId(node), null);
-        }
-    }
-
-    
-    /**
-     * Clears the given property for the given node. If the property is predictive in an upwards direction, it 
-     * will also be cleared for all successors of the given node. If the property is predictive in a downwards direction,
-     * it will also be cleared for all predecessors of the given node.<br>
-     * <br>
-     * The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-     * Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-     * a complexity of amortized O(1). 
-     * 
-     * @param node
-     * @param property
-     */
-    private void removeProperty(long identifier, PredictiveProperty property) {
-
-        this.setModified();
-        if (property.getDirection() == Direction.UP) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.DOWN) {
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else if (property.getDirection() == Direction.BOTH) {
-            this.propertiesUp.get(property).clear(identifier, ElementComparator.GEQ, nodes.getMultiplier());
-            this.propertiesDown.get(property).clear(identifier, ElementComparator.LEQ, nodes.getMultiplier());
-        } else {
-            this.propertiesNone.get(property).put(identifier, null);
-        }
-    }
-
-    /**
      * To string
      * @param builder
      * @param properties
@@ -864,7 +810,7 @@ public class Lattice<T, U> {
      * @return
      */
     LongIterator listAllNodesAsIdentifiers(int level) {
-        return new WrappedPrimitiveLongIterator(null, this.listAllNodesAsIdentifiersImpl(level, nodes.getMultiplier()));
+        return this.listAllNodesAsIdentifiersImpl(level);
     }
 
     /**

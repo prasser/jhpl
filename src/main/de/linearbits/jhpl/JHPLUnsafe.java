@@ -100,7 +100,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutProperty() {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array)); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -113,7 +113,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutProperty(int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array)); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -127,7 +127,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutProperty(final PredictiveProperty property) {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array, property);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array), property); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -141,7 +141,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutProperty(final PredictiveProperty property, int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array, property);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array), property); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -154,7 +154,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutPropertyAndNotStored() {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array) && !lattice.contains(array);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array)) && !lattice.contains(array); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -167,7 +167,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithoutPropertyAndNotStored(int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return !lattice.hasProperty(array) && !lattice.contains(array);
+                return !lattice.hasProperty(array, lattice.nodes().getLevel(array)) && !lattice.contains(array); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -179,7 +179,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithProperty() {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array)); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -192,7 +192,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithProperty(int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array)); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -205,7 +205,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithProperty(final PredictiveProperty property) {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array, property);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array), property); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -219,7 +219,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithProperty(final PredictiveProperty property, int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array, property);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array), property); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -232,7 +232,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithPropertyOrStored() {
         return new ConditionalIntArrayIterator(listAllNodes(), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array) || lattice.contains(array);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array)) || lattice.contains(array); // TODO: Use iterator that returns the level
             }
         });
     }
@@ -245,7 +245,7 @@ public class JHPLUnsafe {
     public Iterator<int[]> listNodesWithPropertyOrStored(int level) {
         return new ConditionalIntArrayIterator(listAllNodes(level), new IntArrayCondition(){
             public boolean holds(int[] array) {
-                return lattice.hasProperty(array) || lattice.contains(array);
+                return lattice.hasProperty(array, lattice.nodes().getLevel(array)) || lattice.contains(array); // TODO: Use iterator that returns the level
             }
         });
     }

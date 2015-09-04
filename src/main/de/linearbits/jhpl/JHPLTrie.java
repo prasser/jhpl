@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.linearbits.jhpl.JHPLIterator.LongIterator;
+import de.linearbits.jhpl.JHPLIterator.TrieIterator;
 import de.linearbits.jhpl.JHPLStack.IntegerStack;
 import de.linearbits.jhpl.JHPLStack.LongStack;
 
@@ -25,533 +26,118 @@ import de.linearbits.jhpl.JHPLStack.LongStack;
  * This class implements a simple trie for integers that is materialized in a backing integer array
  * @author Fabian Prasser
  */
-class JHPLTrie {
+abstract class JHPLTrie {
 
-    /** 
-     * Comparator
-     * 
-     * @author Fabian Prasser
-     */
-    static enum ElementComparator {
-        /** Equals */
-        EQ, 
-        /** Greater than or equals */
-        GEQ,
-        /** Less than or equals */
-        LEQ 
-    }
-    
-    /** Constant*/
-    private static final double COMPACTION_THRESHOLD = 0.2d;
+    /** Constant */
+    protected static final double COMPACTION_THRESHOLD = 0.2d;
 
     /** The buffer */
-    private final JHPLBuffer    buffer;
+    protected final JHPLBuffer    buffer;
     /** The number of dimensions */
-    private final int           dimensions;
+    protected final int           dimensions;
     /** The height of each dimension */
-    private final int[]         heights;
+    protected final int[]         heights;
     /** The Lattice */
-    private final Lattice<?, ?> lattice;
+    protected final Lattice<?, ?> lattice;
     /** The number of levels */
-    private final int           levels;
+    protected final int           levels;
     /** The number of used memory units */
-    private int                 used;
+    protected int                 used;
+    /** Are we including level counters */
+    protected boolean             pruning;
+    /** Default bound for pruning */
+    protected final int           bound;
 
     /**
      * Constructs a new trie
      * @param lattice
+     * @param pruning
      */
-    JHPLTrie(Lattice<?, ?> lattice) {
+    JHPLTrie(Lattice<?, ?> lattice, boolean pruning, int bound) {
         
         // Initialize. Root node will be at offset 0
         this.dimensions = lattice.nodes().getDimensions();
         this.heights = lattice.nodes().getHeights();
         this.buffer = new JHPLBuffer();
-        this.buffer.allocate(heights[0]);
-        this.used = heights[0];
+        this.buffer.allocate(heights[0] + (pruning ? 1 : 0));
+        this.bound = bound;
+        if (pruning) {
+            this.buffer.memory[0] = (bound == Integer.MAX_VALUE) ? Integer.MAX_VALUE - 1 : Integer.MIN_VALUE + 1;
+        }
+        this.used = heights[0] + (pruning ? 1 : 0);
         this.lattice = lattice;
+        this.pruning = pruning;
         int sum = 0;
         for (int i = 0; i < this.heights.length; i++) {
             sum += this.heights[i] - 1;
         }
         this.levels = sum + 1;
     }
-
-    /**
-     * Clears all elements from this trie for the given element
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearEQ(int[] element, int dimension, int offset) {
-
-        // Init
-        int elementOffset = offset + element[dimension];
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            buffer.memory[elementOffset] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            // Recursion
-        } else {
-            int pointer = buffer.memory[elementOffset];
-            if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                if (!clearEQ(element, dimension + 1, pointer)) {
-                    buffer.memory[elementOffset] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                    used -= heights[dimension + 1];
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-
-    /**
-     * Clears all elements from this trie for the given element
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearEQ(long identifier, int dimension, int offset, long[] multiplier) {
-
-        // Init
-        long mult = multiplier[dimension];
-        int elementOffset = offset + (int)(identifier / mult);
-        identifier %= mult;
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            buffer.memory[elementOffset] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            // Recursion
-        } else {
-            int pointer = buffer.memory[elementOffset];
-            if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                if (!clearEQ(identifier, dimension + 1, pointer, multiplier)) {
-                    buffer.memory[elementOffset] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                    used -= heights[dimension + 1];
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-
-    /**
-     * Clears all elements from this trie for the given element
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearGEQ(int[] element, int dimension, int offset) {
-
-        // Init
-        int elementOffset = offset + element[dimension];
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
-                buffer.memory[elementOffset + i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            }
-            // Recursion
-        } else {
-            for (int i = 0; i < heights[dimension] - element[dimension]; i++) {
-                int pointer = buffer.memory[elementOffset + i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    if (!clearGEQ(element, dimension + 1, pointer)) {
-                        buffer.memory[elementOffset + i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                        used -= heights[dimension + 1];
-                    }
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-
-    /**
-     * Clears all elements from this trie for the given element
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearGEQ(long identifier, int dimension, int offset, long[] multiplier) {
-
-        // Init
-        long mult = multiplier[dimension];
-        int value = (int)(identifier / mult);
-        identifier %= mult;
-        int elementOffset = offset + value;
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            for (int i = 0; i < heights[dimension] - value; i++) {
-                buffer.memory[elementOffset + i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            }
-            // Recursion
-        } else {
-            for (int i = 0; i < heights[dimension] - value; i++) {
-                int pointer = buffer.memory[elementOffset + i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    if (!clearGEQ(identifier, dimension + 1, pointer, multiplier)) {
-                        buffer.memory[elementOffset + i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                        used -= heights[dimension + 1];
-                    }
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-  
-    /**
-     * Clears all elements from this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearLEQ(int[] element, int dimension, int offset) {
-
-        // Init
-        int elementOffset = offset + element[dimension];
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            for (int i = 0; i <= element[dimension]; i++) {
-                buffer.memory[elementOffset - i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            }
-
-            // Recursion
-        } else {
-            for (int i = 0; i <= element[dimension]; i++) {
-                int pointer = buffer.memory[elementOffset - i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    if (!clearLEQ(element, dimension + 1, pointer)) {
-                        buffer.memory[elementOffset - i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                        used -= heights[dimension + 1];
-                    }
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-    /**
-     * Clears all elements from this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     * @return Whether some elements are still referenced by this node
-     */
-    private boolean clearLEQ(long identifier, int dimension, int offset, long[] multiplier) {
-
-        // Init
-        long mult = multiplier[dimension];
-        int value = (int)(identifier / mult);
-        identifier %= mult;
-        int elementOffset = offset + value;
-
-        // Terminate
-        if (dimension == dimensions - 1) {
-            for (int i = 0; i <= value; i++) {
-                buffer.memory[elementOffset - i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-            }
-
-            // Recursion
-        } else {
-            for (int i = 0; i <= value; i++) {
-                int pointer = buffer.memory[elementOffset - i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                    if (!clearLEQ(identifier, dimension + 1, pointer, multiplier)) {
-                        buffer.memory[elementOffset - i] = JHPLBuffer.FLAG_NOT_AVAILABLE;
-                        used -= heights[dimension + 1];
-                    }
-                }
-            }
-        }
-
-        // Return
-        for (int i = offset; i < offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) { return true; }
-        }
-        return false;
-    }
-
-    /**
-     * Compaction method on the trie
-     */
-    private void compactify() {
-        Iterator<int[]> iterator = this.iterator();
-        JHPLTrie other = new JHPLTrie(this.lattice);
-        int[] element = iterator.next();
-        while (element != null) {
-            other.put(element);
-            element = iterator.next();
-        }
-        this.buffer.replace(other.buffer);
-    }
-
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private boolean containsEQ(int[] element) {
-        
-        // Init
-        int offset = 0;
-        
-        // Foreach
-        for (int dimension = 0; dimension < element.length; dimension++) {
     
-            // Increment
-            offset += element[dimension];
-    
-            // Find
-            int pointer = buffer.memory[offset];
-    
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                return false;
-                
-            // Next
-            } else {
-                offset = pointer;
-            }
-        }
-        
-        // Terminate
-        return true;
-    }
-
     /**
-     * Queries this trie for the given element
-     * 
-     * @param identifier
-     * @param dimension
-     * @param offset
+     * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
+     * <code>null</code> is returned.
+     * @return
      */
-    private boolean containsEQ(long identifier, long[] multiplier) {
+    private TrieIterator _iterator() {
         
-        // Init
-        int offset = 0;
+        // Initialize
+        final int[] element = new int[this.dimensions];
+        final IntegerStack offsets = new IntegerStack(this.dimensions);
+        final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
+        offsets.push(0);
+        pointers.push(0);
+        element[0] = 0;
         
-        // Foreach
-        for (int dimension = 0; dimension < multiplier.length; dimension++) {
-    
-            // Increment
-            long mult = multiplier[dimension];
-            offset += (int)(identifier / mult);
-            identifier %= mult;
-    
-            // Find
-            int pointer = buffer.memory[offset];
-    
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                return false;
-                
-            // Next
-            } else {
-                offset = pointer;
-            }
-        }
-        
-        // Terminate
-        return true;
-    }
-
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private boolean containsGEQ(int[] element, int dimension, int offset) {
-
-        if (dimension == dimensions) {
-            return true;
-        } else {
-            for (int i = element[dimension]; i < heights[dimension]; i++) {
-                int pointer = buffer.memory[offset + i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && containsGEQ(element, dimension + 1, pointer)) { 
-                    return true; 
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private boolean containsGEQ(long identifier, int dimension, int offset, long[] multiplier) {
-
-        // Init
-        long mult = multiplier[dimension];
-        int value = (int)(identifier / mult);
-        identifier %= mult;
-        offset += value;
-
-        // Foreach
-        for (int i = 0; i < heights[dimension] - value; i++) {
+        // Return
+        return new TrieIterator() {
             
-            int pointer = buffer.memory[offset + i];
-
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                continue;
-
-                // Terminate
-            } else if (dimension == dimensions - 1) {
-                return true;
-
-                // Recursion
-            } else if (containsGEQ(identifier, dimension + 1, pointer, multiplier)) { 
-                return true; 
+            int level = 0;
+                
+            @Override
+            public int level() {
+                return level;
             }
-        }
-        return false;
-
-    }
-   
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private boolean containsLEQ(int[] element, int dimension, int offset) {
-
-        if (dimension == dimensions) {
-            return true;          
-        } else {
-            for (int i = element[dimension]; i >= 0; i--) {
-                int pointer = buffer.memory[offset + i];
-                if (pointer != JHPLBuffer.FLAG_NOT_AVAILABLE && containsLEQ(element, dimension + 1, pointer)) { 
-                    return true; 
+            
+            @Override
+            public int[] next() {
+                
+                // Iteratively traverse the trie
+                while (true) {
+                    
+                    // End of node
+                    while (offsets.peek() == heights[offsets.size() - 1]) {
+                        offsets.pop();
+                        pointers.pop();
+                        if (offsets.empty()) {
+                            return null;
+                        }
+                    }
+                    
+                    // Check and increment
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
+                    offsets.inc();
+                
+                    // If available
+                    if (mem != JHPLBuffer.FLAG_NOT_AVAILABLE) {
+            
+                        int dimension = offsets.size() - 1;
+                        level -= element[dimension];
+                        element[dimension] = offsets.peek() - 1;
+                        level += element[dimension];
+                        if (offsets.size() < dimensions) {
+                            // Inner node
+                            offsets.push(0);
+                            pointers.push(mem);
+                        } else {
+                            // Leaf node
+                            return element;
+                        }
+                    }
                 }
             }
-        }
-        return false;
-    }
-    /**
-     * Queries this trie for the given element
-     * 
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private boolean containsLEQ(long identifier, int dimension, int offset, long[] multiplier) {
-
-        long mult = multiplier[dimension];
-        int value = (int)(identifier / mult);
-        identifier %= mult;
-        offset += value;
-        
-        // Foreach
-        for (int i = 0; i <= value; i++) {
-            
-            int pointer = buffer.memory[offset - i];
-
-            // Terminate
-            if (pointer == JHPLBuffer.FLAG_NOT_AVAILABLE) {
-                continue;
-
-                // Terminate
-            } else if (dimension == dimensions - 1) {
-                return true;
-
-                // Recursion
-            } else if (containsLEQ(identifier, dimension + 1, pointer, multiplier)) { 
-                return true; 
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Helper for putting an element into this trie
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private void put(int[] element, int dimension, int offset) {
-       
-        offset += element[dimension];
-        
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1]);
-            used += heights[dimension + 1];
-            buffer.memory[offset] = pointer;
-        }
-        
-        put(element, dimension + 1, buffer.memory[offset]);
-    }
-
-    /**
-     * Helper for putting an element into this trie
-     * @param element
-     * @param dimension
-     * @param offset
-     */
-    private void put(long identifier, int dimension, int offset, long[] multiplier) {
-       
-
-        long mult = multiplier[dimension];
-        offset += (int)(identifier / mult);
-        identifier %= mult;
-
-        if (dimension == dimensions - 1) {
-            buffer.memory[offset] = JHPLBuffer.FLAG_AVAILABLE;
-            return;
-        } 
-        
-        if (buffer.memory[offset] == JHPLBuffer.FLAG_NOT_AVAILABLE){
-            int pointer = buffer.allocate(heights[dimension + 1]);
-            used += heights[dimension + 1];
-            buffer.memory[offset] = pointer;
-        }
-        
-        put(identifier, dimension + 1, buffer.memory[offset], multiplier);
+        };
     }
 
     /**
@@ -566,47 +152,34 @@ class JHPLTrie {
         StringBuilder builder = new StringBuilder();
         List<Integer> children = new ArrayList<Integer>();
         for (int i = offset; i<offset + heights[dimension]; i++) {
-            if (buffer.memory[i] != JHPLBuffer.FLAG_NOT_AVAILABLE) {
+            if (buffer.memory[i + (pruning ? 1 : 0)] != JHPLBuffer.FLAG_NOT_AVAILABLE) {
                 children.add(i);
             }
         }
+        int level = buffer.memory[offset];
         for (int j = 0; j < children.size() - 1; j++) {
             int i = children.get(j);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append("]\n");
+            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         if (children.size() > 0) {
             int i = children.get(children.size() - 1);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append("]\n");
+            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), true, buffer.memory[i], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "│   "), true, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         return builder;
     }
-
+    
     /**
-     * Clears all entries from this trie for the given element
-     * @param node
-     * @param comparator
-     * @return
+     * Clears all above/below this element
+     * @param element
      */
-    void clear(int[] node, ElementComparator comparator) {
-        
-        // Clear
-        switch (comparator) {
-        case EQ:
-            clearEQ(node, 0, 0);
-            break;
-        case GEQ:
-            clearGEQ(node, 0, 0);
-            break;
-        case LEQ:
-            clearLEQ(node, 0, 0);
-            break;
-        }
+    void clear(int[] element) {
+        this.clear(element, 0, 0);
         
         // Compaction
         double utilization = (double)used / (double)buffer.memory.length;
@@ -615,84 +188,55 @@ class JHPLTrie {
         }
     }
 
+    abstract boolean clear(int[] element, int dimension, int offset);
+        
     /**
-     * Clears all entries from this trie for the given element
-     * @param node
-     * @param comparator
-     * @return
+     * Compaction method on the trie
      */
-    void clear(long identifier, ElementComparator comparator, long[] multiplier) {
+    void compactify() {
         
-        // Clear
-        switch (comparator) {
-        case EQ:
-            clearEQ(identifier, 0, 0, multiplier);
-            break;
-        case GEQ:
-            clearGEQ(identifier, 0, 0, multiplier);
-            break;
-        case LEQ:
-            clearLEQ(identifier, 0, 0, multiplier);
-            break;
+        TrieIterator iterator = this._iterator();
+        JHPLTrie other = newInstance();
+        int[] element = iterator.next();
+        int level = iterator.level();
+        while (element != null) {
+            other.put(element, level);
+            element = iterator.next();
+            level = iterator.level();
         }
-        
-        // Compaction
-        double utilization = (double)used / (double)buffer.memory.length;
-        if (utilization < COMPACTION_THRESHOLD) {
-            compactify();
-        }
+        this.buffer.replace(other.buffer);
     }
-
     /**
      * Queries this trie for the given element
      * @param node
      * @return
      */
     boolean contains(int[] node) {
-        return contains(node, ElementComparator.EQ);
+        return contains(node, bound, 0, 0);
     }
-
+    
+//    abstract void check(int[] element, int offset, int dimension);
 
     /**
      * Queries this trie for the given element
      * @param node
-     * @param comparator
+     * @param level
      * @return
      */
-    boolean contains(int[] node, ElementComparator comparator) {
-        
-        switch (comparator) {
-        case EQ:
-            return containsEQ(node);
-        case GEQ:
-            return containsGEQ(node, 0, 0);
-        case LEQ:
-            return containsLEQ(node, 0, 0);
-        default:
-            throw new IllegalStateException("Unknown comparator");
-        }
+    boolean contains(int[] node, int level) {
+        return contains(node, level, 0, 0);
     }
 
     /**
      * Queries this trie for the given element
-     * @param identifier
-     * @param comparator
-     * @return
+     * 
+     * @param element
+     * @param level
+     * @param dimension
+     * @param offset
      */
-    boolean contains(long identifier, ElementComparator comparator, long[] multiplier) {
-        
-        switch (comparator) {
-        case EQ:
-            return containsEQ(identifier, multiplier);
-        case GEQ:
-            return containsGEQ(identifier, 0, 0, multiplier);
-        case LEQ:
-            return containsLEQ(identifier, 0, 0, multiplier);
-        default:
-            throw new IllegalStateException("Unknown comparator");
-        }
-    }
-    
+    abstract boolean contains(int[] element, int level, int dimension, int offset);
+
     /**
      * Returns the memory consumption in bytes
      * @return
@@ -709,7 +253,6 @@ class JHPLTrie {
         return this.levels;
     }
 
-
     /**
      * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
      * <code>null</code> is returned.
@@ -721,6 +264,7 @@ class JHPLTrie {
         final int[] element = new int[this.dimensions];
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         element[0] = 0;
@@ -746,7 +290,7 @@ class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                 
                     // If available
@@ -767,7 +311,7 @@ class JHPLTrie {
             @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
-
+    
     /**
      * Returns an iterator over all elements on the given level stored in the trie. 
      * Note: hasNext() is not implemented. Simply iterate until <code>null</code> is returned.
@@ -781,6 +325,7 @@ class JHPLTrie {
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
         final int[] mins = new int[this.dimensions];
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         element[0] = 0;
@@ -820,7 +365,7 @@ class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                     
                     // Available
@@ -848,7 +393,8 @@ class JHPLTrie {
             @Override public void remove() { throw new UnsupportedOperationException(); }
         };
     }
-    
+
+
     /**
      * Returns an iterator over all elements in the trie. Note: hasNext() is not implemented. Simply iterate until
      * <code>null</code> is returned.
@@ -860,6 +406,7 @@ class JHPLTrie {
         final LongStack identifiers = new LongStack(this.dimensions);
         final IntegerStack offsets = new IntegerStack(this.dimensions);
         final IntegerStack pointers = new IntegerStack(this.dimensions);
+        final int offset = pruning ? 1 : 0;
         offsets.push(0);
         pointers.push(0);
         identifiers.push(0L);
@@ -887,7 +434,7 @@ class JHPLTrie {
                     }
                     
                     // Check and increment
-                    int mem = buffer.memory[pointers.peek() + offsets.peek()];
+                    int mem = buffer.memory[pointers.peek() + offsets.peek() + offset];
                     offsets.inc();
                 
                     // If available
@@ -910,23 +457,21 @@ class JHPLTrie {
         };
     }
 
+    abstract JHPLTrie newInstance();
+    
     /**
      * Puts an element into this trie
      * @param element
      */
     void put(int[] element) {
-        put(element, 0, 0);
+        put(element, bound);
     }
-
-
+    
     /**
      * Puts an element into this trie
      * @param element
      */
-    void put(long identifier, long[] multiplier) {
-        put(identifier, 0, 0, multiplier);
-    }
-
+    abstract void put(int[] element, int level);
 
     /**
      * To string method

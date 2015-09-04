@@ -82,8 +82,8 @@ public class JHPLIterator {
             pulled = false;
             return next;
         }
-    }
-    
+    };
+
     /**
      * An iterator that wraps another iterator and only returns elements for which the
      * given condition holds.
@@ -144,13 +144,23 @@ public class JHPLIterator {
             this.pulled = true;
         }
     }
-
+    
     /**
      * A condition on an int[]
      * @author Fabian Prasser
      */
     static interface IntArrayCondition {
         public boolean holds(int[] array);
+    }
+
+    /**
+     * Long iterator
+     * @author prasser
+     *
+     */
+    static interface TrieIterator {
+        public int level();
+        public int[] next();
     }
     
     /**
