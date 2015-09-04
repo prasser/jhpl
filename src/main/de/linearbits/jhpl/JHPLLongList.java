@@ -60,6 +60,27 @@ class JHPLLongList {
     }
     
     /**
+     * Returns a reverse iterator
+     * @return
+     */
+    public LongIterator reverseIterator() {
+        return new LongIterator() {
+            
+            int index = size - 1;
+            
+            @Override
+            public boolean hasNext() {
+                return index >= 0;
+            }
+            
+            @Override
+            public long next() {
+                return memory[index--];
+            }
+        };
+    }
+    
+    /**
      * Adds the given element
      * @param element
      */
