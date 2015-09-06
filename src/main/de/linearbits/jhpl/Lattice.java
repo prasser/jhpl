@@ -274,7 +274,7 @@ public class Lattice<T, U> {
         } else {
             JHPLLongList result = new JHPLLongList();
             listAllNodesAsIdentifiersImplTopDown(result, this.numNodes-1, nodes.getLevel(this.numNodes-1), level, 0);
-            return result.iterator();
+            return result.reverseIterator();
         }
     }
 
