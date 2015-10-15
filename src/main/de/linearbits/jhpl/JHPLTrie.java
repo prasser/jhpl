@@ -159,16 +159,16 @@ abstract class JHPLTrie {
         int level = buffer.memory[offset];
         for (int j = 0; j < children.size() - 1; j++) {
             int i = children.get(j);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
+            builder.append(prefix).append(isTail ? "+-- " : "+-- ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), false, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "|   "), false, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         if (children.size() > 0) {
             int i = children.get(children.size() - 1);
-            builder.append(prefix).append(isTail ? "└── " : "├── ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
+            builder.append(prefix).append(isTail ? "+-- " : "+-- ").append("[").append(i - offset).append(pruning ? "] lvl {"+level+"}" : "]").append("\n");
             if (dimension != dimensions - 1) {
-                builder.append(toString(prefix + (isTail ? "    " : "│   "), true, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
+                builder.append(toString(prefix + (isTail ? "    " : "|   "), true, buffer.memory[i + (pruning ? 1 : 0)], dimension + 1));
             }
         }
         return builder;
@@ -487,15 +487,15 @@ abstract class JHPLTrie {
         
         StringBuilder builder = new StringBuilder();
         builder.append(prefix1).append("Trie\n");
-        builder.append(prefix2).append("├── Memory statistics\n");
-        builder.append(prefix2).append("|   ├── Allocated: ").append(allocated).append(" [bytes]\n");
-        builder.append(prefix2).append("|   ├── Used: ").append(used).append(" [bytes]\n");
-        builder.append(prefix2).append("|   └── Relative: ").append(format.format(relative)).append(" [%]\n");
-        builder.append(prefix2).append("├── Buffer\n");
-        builder.append(prefix2).append("|   └── ").append(Arrays.toString(buffer.memory)).append("\n");
-        builder.append(prefix2).append("└── Tree\n");
+        builder.append(prefix2).append("+-- Memory statistics\n");
+        builder.append(prefix2).append("|   +-- Allocated: ").append(allocated).append(" [bytes]\n");
+        builder.append(prefix2).append("|   +-- Used: ").append(used).append(" [bytes]\n");
+        builder.append(prefix2).append("|   +-- Relative: ").append(format.format(relative)).append(" [%]\n");
+        builder.append(prefix2).append("+-- Buffer\n");
+        builder.append(prefix2).append("|   +-- ").append(Arrays.toString(buffer.memory)).append("\n");
+        builder.append(prefix2).append("+-- Tree\n");
         builder.append(toString(prefix2 + "    ", false, 0, 0));
-        builder.append(prefix2).append("    └── [EOT]\n");
+        builder.append(prefix2).append("    +-- [EOT]\n");
         return builder.toString();
     }
 }

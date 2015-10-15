@@ -30,23 +30,6 @@ import de.linearbits.jhpl.JHPLStack.LongStack;
  * successors or for all (direct and indirect) predecessors or for both (direct and indirect) successors and
  * (direct and indirect) predecessors of a given element. In addition to predictive properties, data can 
  * be associated to individual nodes.<br>
- * <br>
- * The methods in this class are optimized for read access and have the following run-time complexities:
- * <ul>
- *  <li>getData(node): Retrieves the associated data. Guaranteed O(1).</li>
- *  <li>putData(node): Associates data with a node. Guaranteed O(1).</li>
- *  <li>contains(node): Returns whether any data is stored about a node. Guaranteed O(1).</li>
- *  <li>hasProperty(node): Returns whether any property is associated with a node. Guaranteed O(1).</li>
- *  <li>hasProperty(node, property): Determines whether a node is associated with a (predictive) property. Guaranteed O(1).</li>
- *  <li>putProperty(node, property): Associates a node and predecessors or successors with a (predictive) property. 
- *      The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
- *      Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
- *      a complexity of amortized O(1).</li>
- *  <li>removeProperty(node, property): Removes the association between a node and predecessors or successors with a (predictive) property. 
- *      The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
- *      Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
- *      a complexity of amortized O(1).</li>
- * </ul>
  * 
  * @author Fabian Prasser
  *
@@ -446,20 +429,20 @@ public class Lattice<T, U> {
         StringBuilder builder = new StringBuilder();
         builder.append("Lattice\n");
         if (!propertiesUp.isEmpty()) {
-            builder.append("├── Upwards-predictive properties\n");
+            builder.append("+-- Upwards-predictive properties\n");
             toString(builder, propertiesUp);
         }
         if (!propertiesDown.isEmpty()) {
-            builder.append("├── Downwards-predictive properties\n");
+            builder.append("+-- Downwards-predictive properties\n");
             toString(builder, propertiesDown);
         }
         if (!propertiesNone.isEmpty()) {
-            builder.append("├── Non-predictive properties\n");
+            builder.append("+-- Non-predictive properties\n");
             toStringNone(builder, propertiesNone);
         }
-        builder.append("├── Master\n");
-        builder.append(master.toString("|   └── ", "|       "));
-        builder.append("└── Memory: ").append(getByteSize()).append(" [bytes]\n");
+        builder.append("+-- Master\n");
+        builder.append(master.toString("|   +-- ", "|       "));
+        builder.append("+-- Memory: ").append(getByteSize()).append(" [bytes]\n");
         return builder.toString();
     }
 
@@ -749,13 +732,13 @@ public class Lattice<T, U> {
         list.addAll(properties.keySet());
         for (int i=0; i<list.size()-1; i++) {
             PredictiveProperty property = list.get(i);
-            builder.append("|   ├── ").append(property.getLabel()).append("\n");
-            builder.append(properties.get(property).toString("|   |   └── ", "|   |       "));
+            builder.append("|   +-- ").append(property.getLabel()).append("\n");
+            builder.append(properties.get(property).toString("|   |   +-- ", "|   |       "));
         }
         if (!list.isEmpty()) {
             PredictiveProperty property = list.get(list.size()-1);
-            builder.append("|   └── ").append(property.getLabel()).append("\n");
-            builder.append(properties.get(property).toString("|       └── ", "|           "));
+            builder.append("|   +-- ").append(property.getLabel()).append("\n");
+            builder.append(properties.get(property).toString("|       +-- ", "|           "));
         }
     }
     
@@ -769,8 +752,8 @@ public class Lattice<T, U> {
         list.addAll(properties.keySet());
         for (int i=0; i<list.size()-1; i++) {
             PredictiveProperty property = list.get(i);
-            builder.append("|   ├── ").append(property.getLabel()).append("\n");
-            builder.append("|   |   └── Not implemented");
+            builder.append("|   +-- ").append(property.getLabel()).append("\n");
+            builder.append("|   |   +-- Not implemented");
         }
     }
 

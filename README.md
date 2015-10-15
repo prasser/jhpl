@@ -4,7 +4,7 @@
 
 In mathematics, a *lattice* is a partially ordered set ```L``` in which every two elements have a unique supremum (also called 
 a least upper bound) and a unique infimum (also called a greatest lower bound). A bounded lattice is 
-a lattice that additionally has a greatest element ```1``` and a least element ```0```, which satisfy ```0 â‰¤ x â‰¤ 1``` for 
+a lattice that additionally has a greatest element ```1``` and a least element ```0```, which satisfy ```0 <= x <= 1``` for 
 every ```x in L```. [(Source: Wikipedia)](http://en.wikipedia.org/wiki/Lattice_%28order%29)
 
 Lattices can be modeled with *Hasse diagrams*. In order theory, a Hasse diagram is a type of mathematical 
@@ -30,7 +30,7 @@ about individual elements and groups of elements as well as supporting the enume
 ##Motivation##
 
 The type of lattices modeled by this library can become very large. If a lattice consists of elements with ```n``` dimensions,
-where each dimension ```i``` with (```0 â‰¤ i < n```) has ```m_i``` different components, the total number of elements is 
+where each dimension ```i``` with (```0 <= i < n```) has ```m_i``` different components, the total number of elements is 
 ```m_0 * m_1 * ... * m_(n-1)```.
 
 The aim of this library is to efficiently (in terms of space and time complexity) represent lattices by storing information
@@ -162,11 +162,12 @@ The methods provided by the class ```Lattice``` are optimized for read access an
 - ```getData(node)```: Retrieves the associated data. Guaranteed *O(1)*.
 - ```putData(node, data)```: Associates data with a node. Guaranteed *O(1)*.
 - ```contains(node)```: Returns whether any data is stored about a node. Guaranteed *O(1)*.
-- ```hasProperty(node)```: Returns whether any property is associated with a node (includes inherited properties). Guaranteed *O(1)*.
-- ```hasProperty(node, property)```: Determines whether a node is associated with a property (includes inherited properties). Guaranteed *O(1)*.
+- ```hasProperty(node)```: Returns whether any property is associated with a node (includes inherited properties). 
+	 The worst-case run-time complexity of this operation is *O(#nodes for which put has been called with any property)*.
+- ```hasProperty(node, property)```: Determines whether a node is associated with a property (includes inherited properties). 
+	 The worst-case run-time complexity of this operation is *O(#nodes for which put has already been called with this property)*.
 - ```putProperty(node, property)```: Associates a node and predecessors or successors with a (predictive) property. 
      The worst-case run-time complexity of this operation is *O(#nodes for which put has already been called with this property)*.
-     With real-world access patterns, it is more likely to have a complexity of *amortized O(1)*.
 
 ###Enumerating elements###
 
@@ -204,8 +205,6 @@ any references to them. If you need to keep track of a set of elements: use the 
 
 *Note:* Methods from this library are not thread-safe.
 
-*Note:* This library is work in progress. Things may change in the future.
-
 ##Details and Evaluation##
 
 ###How it works###
@@ -234,37 +233,37 @@ for nodes ```(1, 1, 2)``` and ```(0, 0, 0)```:
 
 ```Java
 Lattice
-â”œâ”€â”€ Upwards-predictive properties
-|   â””â”€â”€ Property1
-|       â””â”€â”€ Trie
-|           â”œâ”€â”€ Memory statistics
-|           |   â”œâ”€â”€ Allocated: 76 [bytes]
-|           |   â”œâ”€â”€ Used: 36 [bytes]
-|           |   â””â”€â”€ Relative: 47.36842 [%]
-|           â”œâ”€â”€ Buffer
-|           |   â””â”€â”€ [9, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, -1, 0, 0, 0, 0, 0, 0, 0]
-|           â””â”€â”€ Tree
-|               â”œâ”€â”€ [0]
-|               â”‚   â””â”€â”€ [0]
-|               â”‚       â””â”€â”€ [0]
-|               â””â”€â”€ [EOT]
-â”œâ”€â”€ Master
-|   â””â”€â”€ Trie
-|       â”œâ”€â”€ Memory statistics
-|       |   â”œâ”€â”€ Allocated: 76 [bytes]
-|       |   â”œâ”€â”€ Used: 56 [bytes]
-|       |   â””â”€â”€ Relative: 73.68421 [%]
-|       â”œâ”€â”€ Buffer
-|       |   â””â”€â”€ [9, 4, 0, 0, 0, 6, 0, 0, -1, 11, 0, -1, 0, 0, 0, 0, 0, 0, 0]
-|       â””â”€â”€ Tree
-|           â”œâ”€â”€ [0]
-|           â”‚   â”œâ”€â”€ [0]
-|           â”‚   â”‚   â””â”€â”€ [0]
-|           â”œâ”€â”€ [1]
-|           â”‚   â””â”€â”€ [1]
-|           â”‚       â””â”€â”€ [2]
-|           â””â”€â”€ [EOT]
-â””â”€â”€ Memory: 424 [bytes]
++---- Upwards-predictive properties
+|   +---- Property1
+|       +---- Trie
+|           +---- Memory statistics
+|           |   +---- Allocated: 76 [bytes]
+|           |   +---- Used: 36 [bytes]
+|           |   +---- Relative: 47.36842 [%]
+|           +---- Buffer
+|           |   +---- [9, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, -1, 0, 0, 0, 0, 0, 0, 0]
+|           +---- Tree
+|               +---- [0]
+|               |     +---- [0]
+|               |         +---- [0]
+|               +---- [EOT]
++---- Master
+|   +---- Trie
+|       +---- Memory statistics
+|       |   +---- Allocated: 76 [bytes]
+|       |   +---- Used: 56 [bytes]
+|       |   +---- Relative: 73.68421 [%]
+|       +---- Buffer
+|       |   +---- [9, 4, 0, 0, 0, 6, 0, 0, -1, 11, 0, -1, 0, 0, 0, 0, 0, 0, 0]
+|       +---- Tree
+|           +---- [0]
+|           |     +---- [0]
+|           |     â”‚   +---- [0]
+|           +---- [1]
+|           |     +---- [1]
+|           |         +---- [2]
+|           +---- [EOT]
++---- Memory: 424 [bytes]
 ```
 
 The difference in byte sizes (152 bytes for both tries vs. 424 bytes for the overall structure) is due to an additional
@@ -276,19 +275,19 @@ Measured with a Lenovo Thinkpad T440s on Ubuntu 14.04 with an Oracle JVM 1.7.0 (
 
 ####Space complexity####
 
-The following table shows a comparison of the in-memory size of lattices with 10Â¹ (ten) to 10â�· (ten million) elements. Each
+The following table shows a comparison of the in-memory size of lattices with 10^1 (ten) to 10^6 (ten million) elements. Each
 lattice has between 1 and 7 dimensions with 10 elements per dimension. The lattices have been materialized with a call to
 ```lattice.unsafe().materialize()``` which is a shortcut for calling ```putData()``` on all elements in the lattice.
 
-| #Elements        | Size           | Time   | Naive size |
-| ---------------: | --------------:| ------:| ----------:|
-| 10Â¹=10           | 324 B          | 0 ms   | 1.1 kB     |
-| 10Â²=100          | 836 B          | 0 ms   | 13.3 kB    |
-| 10Â³=1000         | 6.7 kB         | 1 ms   | 151.2 kB   |
-| 10â�´=10000        | 48.8 kB        | 3 ms   | 1.7 MB     |
-| 10â�µ=100000       | 533.3 kB       | 5 ms   | 18.8 MB    |
-| 10â�¶=1000000      | 6.3 MB         | 35 ms  | 206.4 MB   |
-| 10â�·=10000000     | 47.8 MB        | 300 ms | 2.2 GB     |
+| #Elements         | Size           | Time   | Naive size |
+| ----------------: | --------------:| ------:| ----------:|
+| 10^1=10           | 324 B          | 0 ms   | 1.1 kB     |
+| 10^2=100          | 836 B          | 0 ms   | 13.3 kB    |
+| 10^3=1000         | 6.7 kB         | 1 ms   | 151.2 kB   |
+| 10^4=10000        | 48.8 kB        | 3 ms   | 1.7 MB     |
+| 10^5=100000       | 533.3 kB       | 5 ms   | 18.8 MB    |
+| 10^6=1000000      | 6.3 MB         | 35 ms  | 206.4 MB   |
+| 10^7=10000000     | 47.8 MB        | 300 ms | 2.2 GB     |
 
 For reference, I included the expected in-memory size of a naive implementation, which maintains one integer-array representing 
 components as well as pointers to successors and predecessors for each element.
