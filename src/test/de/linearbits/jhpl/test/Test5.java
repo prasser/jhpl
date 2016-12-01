@@ -31,20 +31,6 @@ public class Test5 {
     }
 
     /**
-     * Formats a given byte size
-     * @param bytes
-     * @param si
-     * @return
-     */
-    private static String formatByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
-    }
-
-    /**
      * Returns a lattice of size 10^dimensions
      * @param dimensions
      * @return
@@ -108,9 +94,9 @@ public class Test5 {
             System.out.print("Lattice with ");
             System.out.print(Math.pow(10, i));
             System.out.print(" nodes has size: ");
-            System.out.print(formatByteCount(lattice.getByteSize(), true));
+            System.out.print(Util.formatByteCount(lattice.getByteSize(), true));
             System.out.print(" (naive: ");
-            System.out.print(formatByteCount(getNaiveSize(lattice), true));
+            System.out.print(Util.formatByteCount(getNaiveSize(lattice), true));
             System.out.print(")");
             System.out.print(" and was materialized in ");
             System.out.print(time);
