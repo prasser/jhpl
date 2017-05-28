@@ -1,6 +1,6 @@
-#JHPL - Java High-Performance Library for Lattices
+# JHPL - Java High-Performance Library for Lattices
 
-##Background##
+## Background
 
 In mathematics, a *lattice* is a partially ordered set ```L``` in which every two elements have a unique supremum (also called 
 a least upper bound) and a unique infimum (also called a greatest lower bound). A bounded lattice is 
@@ -27,7 +27,7 @@ Level-0    (0,0)
 The aim of this library is to efficiently represent very large such lattices, while allowing information to be stored 
 about individual elements and groups of elements as well as supporting the enumeration of elements with certain properties.  
 
-##Motivation##
+## Motivation
 
 The type of lattices modeled by this library can become very large. If a lattice consists of elements with ```n``` dimensions,
 where each dimension ```i``` with (```0 <= i < n```) has ```m_i``` different components, the total number of elements is 
@@ -46,7 +46,7 @@ can be classified without traversing each element and without explicitly storing
 JHPL supports properties that are inherited to all successors, to all predecessors, or to both successors and predecessors. 
 Moreover, JHPL also acts a map which allows to associated objects with individual elements, if required.
 
-##Overview##
+## Overview
 
 JHPL supports lattices in which each dimension consists of a set of objects (optionally of a given type). For example, the following
 lattice represents binary numbers with two digits, where each digit is represented by a string:
@@ -61,7 +61,7 @@ String[][] elements = new String[][]{ {"0", "1"},
 Lattice<String, Integer> lattice = new Lattice<String, Integer>(elements); 
 ```
 
-###Spaces###
+### Spaces
 
 Elements from lattices may be represented in three different *spaces*:
 
@@ -97,7 +97,7 @@ Additionally, the class provides methods for converting iterators:
 - ```Iterator<int[]> sourceIteratorToIndexIterator(Iterator<T[]>)```
 - ```Iterator<Long> sourceIteratorToIdIterator(Iterator<T[]>)```
 
-###Nodes###
+### Nodes
 
 Methods for working with nodes are encapsulated in a class that is accessible via the method
 ```lattice.nodes()```. Some examples:
@@ -141,7 +141,7 @@ For your convenience, JHPL also contains a builder for elements from the source 
 int[] element = lattice.nodes().build().next("B").next("B").next("C").create();
 ```
 
-###Storing data###
+### Storing data
 
 You may use this library to assign data or predictive properties to elements. Predictive properties are implemented in an
 according class and may have an optional label. 
@@ -169,7 +169,7 @@ The methods provided by the class ```Lattice``` are optimized for read access an
 - ```putProperty(node, property)```: Associates a node and predecessors or successors with a (predictive) property. 
      The worst-case run-time complexity of this operation is *O(#nodes for which put has already been called with this property)*.
 
-###Enumerating elements###
+### Enumerating elements
 
 JHPL provides two different ways of access to elements. Firstly, it allows accessing elements about which information
 has been *explicitly* stored (i.e. for which ```putData()``` or ```putProperty()``` has been called). These 
@@ -205,9 +205,9 @@ any references to them. If you need to keep track of a set of elements: use the 
 
 *Note:* Methods from this library are not thread-safe.
 
-##Details and Evaluation##
+## Details and Evaluation
 
-###How it works###
+### How it works
 
 JHPL uses [tries](http://en.wikipedia.org/wiki/Trie) to store implicit information about the contained elements. It manages 
 one trie per property (and direction) as well as a "master" trie for all elements. The tries use the index representation of the 
@@ -269,11 +269,11 @@ Lattice
 The difference in byte sizes (152 bytes for both tries vs. 424 bytes for the overall structure) is due to an additional
 hash table that may be used for associating data to elements.
 
-###Some numbers###
+### Some numbers
 
 Measured with a Lenovo Thinkpad T440s on Ubuntu 14.04 with an Oracle JVM 1.7.0 (rev. 72)
 
-####Space complexity####
+#### Space complexity
 
 The following table shows a comparison of the in-memory size of lattices with 10^1 (ten) to 10^7 (ten million) elements. Each
 lattice has between 1 and 7 dimensions with 10 elements per dimension. The lattices have been materialized with a call to
@@ -292,9 +292,9 @@ lattice has between 1 and 7 dimensions with 10 elements per dimension. The latti
 For reference, I included the expected in-memory size of a naive implementation, which maintains one integer-array representing 
 components as well as pointers to successors and predecessors for each element.
 
-####Run-time complexity####
+#### Run-time complexity
 
-####Storing predictive properties####
+##### Storing predictive properties
 
 The following numbers show the time needed to assign a predictive property to all nodes of a lattice with 1 million elements
 (1 million calls to ```putProperty()```). The best-case performance simply needs to check whether the property already exists 
@@ -302,11 +302,11 @@ and the worst-case performance needs to check, clear the trie and set the proper
 - Best-case: 236 milliseconds (236 nanoseconds per put-operation)
 - Worst-case: 647 milliseconds (647 nanoseconds per put-operation) 
 
-####Enumerating elements####
+##### Enumerating elements
 
 The following numbers show the time needed to enumerate all elements from a materialized lattice with 1 million elements. 
 
-#####1. Enumerating the elements level by level (in a natural order)#####
+###### 1. Enumerating the elements level by level (in a natural order)
 
 ```Java
 for (int level=0; level<lattice.numLevels(); level++) {
@@ -315,25 +315,25 @@ for (int level=0; level<lattice.numLevels(); level++) {
 ```
 This requires ~200ms with a maximum of 8 ms per level (55 levels in total).
 
-#####2. Enumerating all elements (in a natural order)#####
+###### 2. Enumerating all elements (in a natural order)
 
 ```Java
 processAll(lattice.listNodes());
 ```
 This requires ~25ms.
 
-####Putting properties and enumerating elements####
+##### Putting properties and enumerating elements
 
 This is a more complex experiment. First, we create a lattice with 1 million elements. When then create five predictive properties,
 two of which are inherited to successors, two of which are inherited to predecessors and one of which is inherited to successors and
 predecessors. 
 
-#####1. Setting the properties#####
+###### 1. Setting the properties
 
 We associate each property to 10.000 random elements (50.000 put operations). This takes ~178 ms. 
 The resulting lattice consumes about 3.2 MB of space.
 
-#####2. Listing all nodes with any property level-by-level#####
+###### 2. Listing all nodes with any property level-by-level
 
 For each level, we enumerate over all elements that are associated with *any* property. Additionally, we perform a space
 mapping by calling ```toId(element)``` for all elements returned by the iterators. This requires ~318 ms and returns 1M 
@@ -348,7 +348,7 @@ for (int level = 0; level < lattice.numLevels(); level++) {
 
 Calling ```listNodesWithoutProperty()``` exhibits comparable performance.
 
-#####3. Listing nodes with a specific property level-by-level#####
+###### 3. Listing nodes with a specific property level-by-level
 
 For each level and each property, we enumerate over all elements that are associated with the property. 
 Additionally, we perform a space mapping by calling toId(element) for all elements returned by the iterators. 
@@ -364,7 +364,7 @@ for (PredictiveProperty property : properties) {
 }
 ```
 
-#####4. Listing all nodes without any property#####
+###### 4. Listing all nodes without any property
 
 Again we also perform space mapping:
 
@@ -375,13 +375,13 @@ processAll(lattice.space().indexIteratorToIdIterator(iter));
 
 This takes ~170 ms, compared to the 332 ms required for enumerating the elements level-by-level.
 
-##Download##
+## Download
 A binary version (JAR file) is available for download [here](https://rawgithub.com/prasser/jhpl/master/jars/jhpl-0.0.1.jar).
 
 The according Javadoc is available for download [here](https://rawgithub.com/prasser/jhpl/master/jars/jhpl-0.0.1-doc.jar). 
 
-##Documentation##
+## Documentation
 Online documentation can be found [here](https://rawgithub.com/prasser/jhpl/master/doc/index.html).
 
-##License##
+## License
 Apache 2.0
