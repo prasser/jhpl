@@ -101,24 +101,7 @@ extends java.lang.Object</pre>
  or successors of an element in the lattice. Properties can be predictive either for all (direct and indirect) 
  successors or for all (direct and indirect) predecessors or for both (direct and indirect) successors and
  (direct and indirect) predecessors of a given element. In addition to predictive properties, data can 
- be associated to individual nodes.<br>
- <br>
- The methods in this class are optimized for read access and have the following run-time complexities:
- <ul>
-  <li>getData(node): Retrieves the associated data. Guaranteed O(1).</li>
-  <li>putData(node): Associates data with a node. Guaranteed O(1).</li>
-  <li>contains(node): Returns whether any data is stored about a node. Guaranteed O(1).</li>
-  <li>hasProperty(node): Returns whether any property is associated with a node. Guaranteed O(1).</li>
-  <li>hasProperty(node, property): Determines whether a node is associated with a (predictive) property. Guaranteed O(1).</li>
-  <li>putProperty(node, property): Associates a node and predecessors or successors with a (predictive) property. 
-      The worst-case run-time complexity of this operation is O(#nodes for which put has already been called with this property).
-      Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-      a complexity of amortized O(1).</li>
-  <li>removeProperty(node, property): Removes the association between a node and predecessors or successors with a (predictive) property. 
-      The worst-case run-time complexity of this operation is O(#nodes for which put has been called with this property).
-      Depending on your access pattern (e.g. sequential in terms of a path from bottom to top), it may be reduced up to 
-      a complexity of amortized O(1).</li>
- </ul></div>
+ be associated to individual nodes.<br></div>
 </li>
 </ul>
 </div>

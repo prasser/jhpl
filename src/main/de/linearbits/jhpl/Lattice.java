@@ -22,6 +22,7 @@ import de.linearbits.jhpl.JHPLIterator.WrappedIntArrayIterator;
 import de.linearbits.jhpl.JHPLIterator.WrappedPrimitiveLongIterator;
 import de.linearbits.jhpl.JHPLStack.IntegerStack;
 import de.linearbits.jhpl.JHPLStack.LongStack;
+import de.linearbits.jhpl.PredictiveProperty.Direction;
 
 /**
  * This class implements a storage structure for information about elements in very large lattices. To avoid 
@@ -356,25 +357,21 @@ public class Lattice<T, U> {
         }
         
         switch (property.getDirection()) {
-        case UP:
-            JHPLTrie trie = this.propertiesUp.get(property);
-            if (trie == null) {
-                trie = new JHPLTrieLEQ(this);
-                this.propertiesUp.put(property, trie);
-            }
-            trie.clear(node);
-            trie.put(node, level);
-            break;
+        // Make sure that this method can be inlined by keeping
+        // its size under 325 bytes
+        case BOTH:
         case DOWN:
-            trie = this.propertiesDown.get(property);
+            JHPLTrie trie = this.propertiesDown.get(property);
             if (trie == null) {
                 trie = new JHPLTrieGEQ(this);
                 this.propertiesDown.put(property, trie);
             }
             trie.clear(node);
             trie.put(node, level);
-            break;
-        case BOTH:
+            if (property.getDirection() == Direction.DOWN) {
+                break;
+            }
+        case UP:
             trie = this.propertiesUp.get(property);
             if (trie == null) {
                 trie = new JHPLTrieLEQ(this);
@@ -382,16 +379,8 @@ public class Lattice<T, U> {
             }
             trie.clear(node);
             trie.put(node, level);
-            trie = this.propertiesDown.get(property);
-            if (trie == null) {
-                trie = new JHPLTrieGEQ(this);
-                this.propertiesDown.put(property, trie);
-            }
-            trie.clear(node);
-            trie.put(node, level);
             break;
         case NONE:
-            
             JHPLMap<Boolean> map = this.propertiesNone.get(property);
             if (map == null) {
                 map = new JHPLMap<Boolean>();
