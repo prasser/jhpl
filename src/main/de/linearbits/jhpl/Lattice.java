@@ -65,13 +65,30 @@ public class Lattice<T, U> {
     private final long[]                                    multiplier;
 
     /**
+     * Internal constructor for superclass
+     */
+    Lattice() {
+        this.numNodes = 0;
+        this.nodes = null;
+        this.space = null;
+        this.data = null;
+        this.propertiesUp = null;
+        this.propertiesDown = null;
+        this.propertiesNone = null;
+        this.master = null;
+        this.unsafe = null;
+        this.heights = null;
+        this.multiplier = null;
+    }
+        
+    /**
      * Constructs a new lattice
      * 
      * @param elements One array of elements per dimension, ordered from the lowest to the highest element
      */
     @SuppressWarnings("unchecked")
     public Lattice(T[]... elements) {
-
+        
         if (elements == null) {
             throw new NullPointerException("Elements must not be null");
         }
